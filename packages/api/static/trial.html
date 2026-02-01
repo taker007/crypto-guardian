@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Guardian - Start Pro Trial</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+    }
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+    }
+    h1 {
+      color: #00d4aa;
+      font-size: 1.8rem;
+      margin: 0 0 8px 0;
+    }
+    .subtitle {
+      color: #888;
+      margin-bottom: 24px;
+    }
+    .features {
+      text-align: left;
+      background: rgba(0,212,170,0.1);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px 0;
+    }
+    .features h3 {
+      margin: 0 0 12px 0;
+      color: #00d4aa;
+      font-size: 1rem;
+    }
+    .features ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .features li {
+      margin: 8px 0;
+      color: #ccc;
+    }
+    button {
+      background: #00d4aa;
+      color: #1a1a2e;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 12px;
+      transition: all 0.2s;
+    }
+    button:hover:not(:disabled) {
+      background: #00b894;
+      transform: translateY(-1px);
+    }
+    button:disabled {
+      background: #444;
+      cursor: not-allowed;
+    }
+    button.secondary {
+      background: transparent;
+      border: 1px solid #00d4aa;
+      color: #00d4aa;
+    }
+    .status {
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .status.success {
+      background: rgba(0,212,170,0.2);
+      border: 1px solid #00d4aa;
+    }
+    .status.error {
+      background: rgba(255,107,107,0.2);
+      border: 1px solid #ff6b6b;
+    }
+    .status.info {
+      background: rgba(100,149,237,0.2);
+      border: 1px solid #6495ed;
+    }
+    .wallet-display {
+      background: rgba(0,0,0,0.3);
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      word-break: break-all;
+      margin: 16px 0;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      text-align: left;
+    }
+    .step-number {
+      background: #00d4aa;
+      color: #1a1a2e;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .step-number.done {
+      background: #00d4aa;
+    }
+    .step-number.pending {
+      background: #444;
+      color: #888;
+    }
+    .step-text {
+      color: #ccc;
+    }
+    .hidden { display: none; }
+    .no-cc {
+      color: #888;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+    .pricing-options {
+      text-align: left;
+      margin: 20px 0;
+    }
+    .plan-option {
+      background: rgba(0,0,0,0.3);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 8px 0;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .plan-option:hover {
+      border-color: rgba(0,212,170,0.5);
+    }
+    .plan-option input[type="radio"] {
+      margin-right: 12px;
+    }
+    .plan-option label {
+      cursor: pointer;
+      color: #ccc;
+    }
+    .plan-option input[type="radio"]:checked + label {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🛡️ Crypto Guardian</h1>
+      <p class="subtitle">Start Your 7-Day Pro Trial</p>
+
+      <!-- Step 1: Connect Wallet -->
+      <div id="step1">
+        <div class="features">
+          <h3>Pro Trial Includes:</h3>
+          <ul>
+            <li>Unlimited transaction scans</li>
+            <li>Full risk analysis details</li>
+            <li>Contract verification checks</li>
+            <li>7 days free - no credit card</li>
+          </ul>
+        </div>
+
+        <button id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+        <p class="no-cc">No credit card required</p>
+      </div>
+
+      <!-- Step 2: Sign & Start Trial -->
+      <div id="step2" class="hidden">
+        <div class="step">
+          <span class="step-number done">✓</span>
+          <span class="step-text">Wallet connected</span>
+        </div>
+
+        <div class="wallet-display" id="walletDisplay"></div>
+
+        <div id="trialEligible">
+          <p>Sign a message to verify wallet ownership and start your trial.</p>
+          <button id="startTrialBtn" onclick="startTrial()">Start 7-Day Pro Trial</button>
+          <p class="no-cc">No credit card required</p>
+        </div>
+
+        <div id="trialNotEligible" class="hidden">
+          <!-- Will be populated by JS -->
+        </div>
+
+        <div id="upgradeSection" class="hidden">
+          <div class="pricing-options">
+            <h3 style="color:#00d4aa;margin-bottom:16px;">Upgrade to Pro</h3>
+            <div class="plan-option" id="monthlyPlan">
+              <input type="radio" name="plan" value="monthly" id="planMonthly" checked>
+              <label for="planMonthly">
+                <strong>Monthly</strong> - $9/month
+              </label>
+            </div>
+            <div class="plan-option" id="annualPlan">
+              <input type="radio" name="plan" value="annual" id="planAnnual">
+              <label for="planAnnual">
+                <strong>Annual</strong> - $90/year <span style="color:#00d4aa">(Save $18)</span>
+              </label>
+            </div>
+          </div>
+          <button id="upgradeBtn" onclick="startUpgrade()">Upgrade to Pro</button>
+        </div>
+      </div>
+
+      <!-- Status Messages -->
+      <div id="statusMessage" class="hidden"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '';  // Same origin
+    let connectedWallet = null;
+    let currentChallenge = null;
+
+    function showStatus(message, type) {
+      const el = document.getElementById('statusMessage');
+      el.className = `status ${type}`;
+      el.innerHTML = message;
+      el.classList.remove('hidden');
+    }
+
+    function hideStatus() {
+      document.getElementById('statusMessage').classList.add('hidden');
+    }
+
+    async function connectWallet() {
+      hideStatus();
+
+      if (typeof window.ethereum === 'undefined') {
+        showStatus('MetaMask not detected. Please install MetaMask.', 'error');
+        return;
+      }
+
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        connectedWallet = accounts[0].toLowerCase();
+
+        document.getElementById('walletDisplay').textContent = connectedWallet;
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+
+        // Check trial eligibility
+        await checkTrialStatus();
+      } catch (err) {
+        showStatus(`Connection failed: ${err.message}`, 'error');
+      }
+    }
+
+    async function checkTrialStatus() {
+      try {
+        const response = await fetch(`${API_BASE}/api/trial-status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wallet: connectedWallet })
+        });
+
+        const data = await response.json();
+
+        if (data.entitlement === 'PRO_TRIAL') {
+          document.getElementById('trialEligible').classList.add('hidden');
+          document.getElementById('trialNotEligible').classList.remove('hidden');
+          document.getElementById('trialNotEligible').innerHTML = `
+            <div class="status success">
+              <strong>✅ Trial Active</strong><br>
+              ${data.trial_days_remaining} days remaining<br>
+              <small>Upgrade now to keep Pro access forever.</small>
+            </div>
+          `;
+          showUpgradeSection();
+        } else if (data.entitlement === 'PRO_PAID') {
+          document.getElementById('trialEligible').classList.add('hidden');
+          document.getElementById('trialNotEligible').classList.remove('hidden');
+          document.getElementById('trialNotEligible').innerHTML = `
+            <div class="status success">
+              <strong>✅ Pro Access Active</strong><br>
+              You already have unlimited Pro access.<br>
+              <small>Return to MetaMask to continue scanning.</small>
+            </div>
+          `;
+        } else if (data.trial_used) {
+          document.getElementById('trialEligible').classList.add('hidden');
+          document.getElementById('trialNotEligible').classList.remove('hidden');
+          document.getElementById('trialNotEligible').innerHTML = `
+            <div class="status info">
+              <strong>Trial Already Used</strong><br>
+              This wallet has already used its free trial.<br>
+              <small>Upgrade to Pro for unlimited access.</small>
+            </div>
+          `;
+          showUpgradeSection();
+        } else if (data.entitlement === 'BLOCKED') {
+          document.getElementById('trialEligible').classList.add('hidden');
+          document.getElementById('trialNotEligible').classList.remove('hidden');
+          document.getElementById('trialNotEligible').innerHTML = `
+            <div class="status error">
+              <strong>Wallet Restricted</strong><br>
+              This wallet cannot start a trial.
+            </div>
+          `;
+        }
+        // else: show the start trial button (default)
+      } catch (err) {
+        console.error('Failed to check trial status:', err);
+      }
+    }
+
+    async function startTrial() {
+      hideStatus();
+      const btn = document.getElementById('startTrialBtn');
+      btn.disabled = true;
+      btn.textContent = 'Requesting signature...';
+
+      try {
+        // Step 1: Get challenge
+        const challengeRes = await fetch(`${API_BASE}/api/challenge`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wallet: connectedWallet })
+        });
+
+        if (!challengeRes.ok) {
+          throw new Error('Failed to get challenge');
+        }
+
+        const challengeData = await challengeRes.json();
+        currentChallenge = challengeData.challenge;
+
+        // Step 2: Sign message
+        btn.textContent = 'Please sign in MetaMask...';
+        const signature = await window.ethereum.request({
+          method: 'personal_sign',
+          params: [challengeData.message, connectedWallet]
+        });
+
+        // Step 3: Submit to server
+        btn.textContent = 'Activating trial...';
+        const trialRes = await fetch(`${API_BASE}/api/start-trial`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            wallet: connectedWallet,
+            challenge: currentChallenge,
+            signature: signature
+          })
+        });
+
+        const trialData = await trialRes.json();
+
+        if (trialData.success) {
+          document.getElementById('trialEligible').classList.add('hidden');
+          showStatus(`
+            <strong>🎉 Trial Activated!</strong><br>
+            You now have 7 days of unlimited scans.<br><br>
+            <strong>Next step:</strong> Return to MetaMask and try a transaction.<br>
+            Your scans will now show full Pro analysis.
+          `, 'success');
+        } else {
+          showStatus(`Failed: ${trialData.message}`, 'error');
+          btn.disabled = false;
+          btn.textContent = 'Start 7-Day Pro Trial';
+        }
+      } catch (err) {
+        if (err.code === 4001) {
+          showStatus('Signature request cancelled.', 'info');
+        } else {
+          showStatus(`Error: ${err.message}`, 'error');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Start 7-Day Pro Trial';
+      }
+    }
+
+    async function startUpgrade() {
+      hideStatus();
+      const btn = document.getElementById('upgradeBtn');
+      const plan = document.querySelector('input[name="plan"]:checked').value;
+
+      btn.disabled = true;
+      btn.textContent = 'Requesting signature...';
+
+      try {
+        // Step 1: Get challenge
+        const challengeRes = await fetch(`${API_BASE}/api/challenge`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wallet: connectedWallet })
+        });
+
+        if (!challengeRes.ok) {
+          throw new Error('Failed to get challenge');
+        }
+
+        const challengeData = await challengeRes.json();
+        currentChallenge = challengeData.challenge;
+
+        // Step 2: Sign message
+        btn.textContent = 'Please sign in MetaMask...';
+        const signature = await window.ethereum.request({
+          method: 'personal_sign',
+          params: [challengeData.message, connectedWallet]
+        });
+
+        // Step 3: Create checkout session
+        btn.textContent = 'Creating checkout...';
+        const checkoutRes = await fetch(`${API_BASE}/api/create-checkout-session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            wallet: connectedWallet,
+            plan: plan,
+            challenge: currentChallenge,
+            signature: signature
+          })
+        });
+
+        const checkoutData = await checkoutRes.json();
+
+        if (checkoutData.checkout_url) {
+          // Redirect to Stripe Checkout
+          window.location.href = checkoutData.checkout_url;
+        } else {
+          showStatus(`Error: ${checkoutData.error || 'Failed to create checkout'}`, 'error');
+          btn.disabled = false;
+          btn.textContent = 'Upgrade to Pro';
+        }
+      } catch (err) {
+        if (err.code === 4001) {
+          showStatus('Signature request cancelled.', 'info');
+        } else {
+          showStatus(`Error: ${err.message}`, 'error');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Upgrade to Pro';
+      }
+    }
+
+    function showUpgradeSection() {
+      document.getElementById('upgradeSection').classList.remove('hidden');
+    }
+
+    // Check if already connected
+    if (window.ethereum) {
+      window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+        if (accounts.length > 0) {
+          connectedWallet = accounts[0].toLowerCase();
+          document.getElementById('walletDisplay').textContent = connectedWallet;
+          document.getElementById('step1').classList.add('hidden');
+          document.getElementById('step2').classList.remove('hidden');
+          checkTrialStatus();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
