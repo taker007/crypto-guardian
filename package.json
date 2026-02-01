@@ -1,0 +1,28 @@
+{
+  "name": "crypto-guardian",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Crypto Guardian - MetaMask Snap for transaction security analysis",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cryptoguardian/snap.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run --workspace=@cryptoguardian/snap build",
+    "clean": "npm run --workspace=@cryptoguardian/snap clean",
+    "lint": "npm run --workspace=@cryptoguardian/snap lint",
+    "lint:fix": "npm run --workspace=@cryptoguardian/snap lint:fix",
+    "serve": "npm run --workspace=@cryptoguardian/snap serve",
+    "start": "npm run --workspace=@cryptoguardian/snap start",
+    "test": "npm run --workspace=@cryptoguardian/snap test"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

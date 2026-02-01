@@ -1,0 +1,25 @@
+{
+  "version": "0.1.0",
+  "description": "Crypto Guardian - Transaction security analysis for MetaMask",
+  "proposedName": "Crypto Guardian",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cryptoguardian/snap.git"
+  },
+  "source": {
+    "shasum": "KnSrLAVZhL/c7McC6/obsf2g1Jq0HOHlIAK1ZP61X/g=",
+    "location": {
+      "npm": {
+        "filePath": "dist/bundle.js",
+        "packageName": "@cryptoguardian/snap",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "initialPermissions": {
+    "endowment:transaction-insight": {},
+    "snap_dialog": {}
+  },
+  "platformVersion": "4.4.2",
+  "manifestVersion": "0.1"
+}
