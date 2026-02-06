@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "description": "Crypto Guardian provides risk signals for Ethereum tokens. Advisory only — does not block transactions.",
+  "proposedName": "Crypto Guardian",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taker007/crypto-intel.git"
+  },
+  "source": {
+    "shasum": "vSRMTQAcKieIVhdrB22P+4Ff08Vm3XlbFnHUOj5EeMs=",
+    "location": {
+      "npm": {
+        "filePath": "dist/bundle.js",
+        "packageName": "@anthropic/crypto-guardian-snap",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "initialPermissions": {
+    "snap_dialog": {},
+    "endowment:rpc": {
+      "dapps": true,
+      "snaps": false
+    }
+  },
+  "platformVersion": "10.3.0",
+  "manifestVersion": "0.1"
+}
