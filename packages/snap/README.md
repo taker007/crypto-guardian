@@ -1,12 +1,35 @@
-# TypeScript Example Snap
+# Crypto Guardian
 
-This snap demonstrates how to develop a snap with TypeScript. It is a simple
-snap that displays a confirmation dialog when the `hello` JSON-RPC method is
-called.
+Crypto Guardian is a MetaMask SNAP that provides advisory risk signals for Ethereum tokens. It displays informational dialogs via `snap_dialog` to help users make informed decisions before interacting with a token.
+
+**Advisory only — does not block transactions.**
+
+## Permissions
+
+| Permission | Purpose |
+|-----------|---------|
+| `snap_dialog` | Display informational dialogs to the user |
+| `endowment:rpc` (dapps: true) | Receive JSON-RPC calls from dApps |
+
+No private key access. No transaction signing. No account management.
+
+## Installation
+
+Install the SNAP directly in MetaMask Flask from the published manifest URL. No external website or test interface is required.
+
+The SNAP does not rely on any external website or test interface for installation or review.
+
+## RPC Methods
+
+| Method | Description |
+|--------|-------------|
+| `analyzeToken` | Scans a token address and displays a risk summary dialog |
+| `showWarning` | Displays a pre-built risk warning dialog |
+| `showAnalysis` | Displays a detailed analysis dialog |
+| `showAcknowledgement` | Displays an advisory acknowledgement dialog |
+
+All dialogs use the `confirmation` type and are dismissible by the user.
 
 ## Testing
 
-The snap comes with some basic tests, to demonstrate how to write tests for
-snaps. To test the snap, run `yarn test` in this directory. This will use
-[`@metamask/snaps-jest`](https://github.com/MetaMask/snaps/tree/main/packages/snaps-jest)
-to run the tests in `src/index.test.ts`.
+Unit tests are included. Run `yarn test` in this directory to execute them using [`@metamask/snaps-jest`](https://github.com/MetaMask/snaps/tree/main/packages/snaps-jest).
