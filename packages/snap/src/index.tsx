@@ -3,6 +3,8 @@ import { Box, Text, Bold, Divider, Heading, Row } from '@metamask/snaps-sdk/jsx'
 
 import type { RiskLevel, Tradeability, TokenAnalysis } from './types';
 import { getCopy, getDynamicCopy, COPY_MODE } from './copy';
+import { fetchRiskFromCryptoIntel } from './backend';
+import type { ScanResponse } from './backend';
 
 // =============================================================================
 // CRYPTO GUARDIAN SNAP - UI IMPLEMENTATION
@@ -37,6 +39,59 @@ function getRiskLevelLabel(level: RiskLevel): string {
 function getTradeabilityLabel(tradeability: Tradeability): string {
   const dynamicCopy = getDynamicCopy();
   return dynamicCopy.tradeabilityLabels[tradeability];
+}
+
+/**
+ * Map a backend risk level string to the SNAP RiskLevel type.
+ * The backend may return "MEDIUM" which has no SNAP equivalent — fall back to HIGH.
+ */
+function mapRiskLevel(level: string): RiskLevel {
+  switch (level) {
+    case 'LOW':
+      return 'LOW';
+    case 'CRITICAL':
+      return 'CRITICAL';
+    default:
+      return 'HIGH';
+  }
+}
+
+/**
+ * Map a backend tradeability string to the SNAP Tradeability type.
+ * Unknown values fall back to UNVERIFIED (safest default).
+ */
+function mapTradeability(tradeability: string): Tradeability {
+  switch (tradeability) {
+    case 'VERIFIED':
+      return 'VERIFIED';
+    case 'BLOCKED_BY_CONTRACT':
+      return 'BLOCKED_BY_CONTRACT';
+    default:
+      return 'UNVERIFIED';
+  }
+}
+
+/** Fallback analysis returned when the backend is unreachable */
+const FALLBACK_ANALYSIS: TokenAnalysis = {
+  riskLevel: 'HIGH',
+  tradeability: 'UNVERIFIED',
+  warnings: ['Unable to verify this token at the moment.'],
+};
+
+/**
+ * Convert a Crypto Intel ScanResponse into a SNAP TokenAnalysis.
+ * Returns FALLBACK_ANALYSIS if the scan result is null.
+ */
+function mapScanToAnalysis(scan: ScanResponse | null): TokenAnalysis {
+  if (!scan) {
+    return FALLBACK_ANALYSIS;
+  }
+
+  return {
+    riskLevel: mapRiskLevel(scan.risk.level),
+    tradeability: mapTradeability(scan.risk.tradeability),
+    warnings: scan.risk.warnings,
+  };
 }
 
 /**
@@ -199,7 +254,7 @@ function getMockAnalysis(tradeability: Tradeability): TokenAnalysis {
  * - showWarning: Display free tier warning screen
  * - showAnalysis: Display paid tier analysis screen
  * - showAcknowledgement: Display risk acknowledgement screen
- * - analyzeToken: Analyze a token (mock data for now)
+ * - analyzeToken: Analyze a token via Crypto Intel backend
  * - getCopyMode: Returns current copy mode ('formal' or 'plain')
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({
@@ -249,7 +304,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       });
     }
 
-    // Analyze a token address (mock implementation)
+    // Analyze a token address via Crypto Intel backend
     case 'analyzeToken': {
       const params = request.params as { tokenAddress?: string; chainId?: string } | undefined;
 
@@ -257,10 +312,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error('Token address is required');
       }
 
-      // For now, return mock data
-      // TODO: Connect to Crypto Intel backend
-      const mockTradeability: Tradeability = 'UNVERIFIED';
-      const analysis = getMockAnalysis(mockTradeability);
+      const scan = await fetchRiskFromCryptoIntel(params.tokenAddress);
+      const analysis = mapScanToAnalysis(scan);
 
       return snap.request({
         method: 'snap_dialog',

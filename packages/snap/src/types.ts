@@ -22,4 +22,5 @@ export interface TokenAnalysis {
   reason?: string;
   meaning?: string;
   observations?: string[];
+  warnings?: string[];
 }
