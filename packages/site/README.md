@@ -1,4 +1,7 @@
-# TypeScript Example Snap Front-end
+# Crypto Guardian — Internal Development Site
+
+> **Internal development only — not required for MetaMask review.**
+> The SNAP is installed and tested directly via MetaMask Flask. This site is a local development aid and is not part of the review or installation process.
 
 This project was bootstrapped with [Gatsby](https://www.gatsbyjs.com/).
 
