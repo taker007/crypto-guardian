@@ -1,6 +1,6 @@
 {
   "name": "@taker007/crypto-guardian-snap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Crypto Guardian - Risk signals for Ethereum tokens. Advisory only.",
   "repository": {
     "type": "git",
@@ -10,7 +10,8 @@
   "main": "./dist/bundle.js",
   "files": [
     "dist/",
-    "snap.manifest.json"
+    "snap.manifest.json",
+    "assets/"
   ],
   "scripts": {
     "allow-scripts": "yarn workspace root allow-scripts",
