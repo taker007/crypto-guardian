@@ -4,14 +4,14 @@
   "proposedName": "Crypto Guardian",
   "repository": {
     "type": "git",
-    "url": "https://github.com/taker007/crypto-intel.git"
+    "url": "https://github.com/taker007/crypto-guardian.git"
   },
   "source": {
-    "shasum": "ZdsBiL0DlVPc5DbyRlj8/+kCVsSjjQGReNav7455+ss=",
+    "shasum": "+tdv8k+0Ruemg3P+kKhXpHpXZBHDw1OAwj19cdFGwEo=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
-        "packageName": "@anthropic/crypto-guardian-snap",
+        "packageName": "@taker007/crypto-guardian-snap",
         "registry": "https://registry.npmjs.org/"
       }
     }
