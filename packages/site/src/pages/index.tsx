@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import {
   ConnectButton,
   InstallFlaskButton,
-  ReconnectButton,
   TestButton,
   Card,
 } from '../components';
@@ -14,7 +13,11 @@ import {
   useMetaMaskContext,
   useRequestSnap,
 } from '../hooks';
-import { isLocalSnap, shouldDisplayReconnectButton } from '../utils';
+import { isLocalSnap } from '../utils';
+
+// Well-known mainnet token addresses used for reviewer test scenarios
+const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+const USDT = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 
 const Container = styled.div`
   display: flex;
@@ -110,27 +113,15 @@ const Index = () => {
     ? isFlask
     : snapsDetected;
 
-  // Test handlers for each SNAP method
-  const handleShowWarning = async (tradeability: string) => {
-    await invokeSnap({ method: 'showWarning', params: { tradeability } });
-  };
-
-  const handleShowAnalysis = async (tradeability: string) => {
-    await invokeSnap({ method: 'showAnalysis', params: { tradeability } });
-  };
-
-  const handleShowAcknowledgement = async () => {
-    await invokeSnap({ method: 'showAcknowledgement' });
-  };
-
-  const handleAnalyzeToken = async () => {
+  const handleAnalyzeToken = async (tokenAddress: string) => {
     await invokeSnap({
       method: 'analyzeToken',
-      params: {
-        tokenAddress: '0x1234567890123456789012345678901234567890',
-        chainId: '1'
-      }
+      params: { tokenAddress, chainId: 'eth' },
     });
+  };
+
+  const handleShowWarning = async (tradeability: string) => {
+    await invokeSnap({ method: 'showWarning', params: { tradeability } });
   };
 
   return (
@@ -141,27 +132,32 @@ const Index = () => {
       <Subtitle>
         Risk signals for Ethereum tokens — advisory only
       </Subtitle>
+
       <CardContainer>
         {error && (
           <ErrorMessage>
             <b>An error happened:</b> {error.message}
           </ErrorMessage>
         )}
+
+        {/* Step 1: Install MetaMask Flask (shown only if not detected) */}
         {!isMetaMaskReady && (
           <Card
             content={{
               title: 'Install MetaMask Flask',
               description:
-                'Crypto Guardian is a MetaMask SNAP. You need MetaMask Flask (developer version) to test it.',
+                'Crypto Guardian requires MetaMask Flask to run. Install it to continue.',
               button: <InstallFlaskButton />,
             }}
             fullWidth
           />
         )}
+
+        {/* Step 2: Install the SNAP (shown only if not yet installed) */}
         {!installedSnap && (
           <Card
             content={{
-              title: 'Connect & Install',
+              title: 'Install Crypto Guardian',
               description:
                 'Connect your wallet and install the Crypto Guardian SNAP.',
               button: (
@@ -174,47 +170,50 @@ const Index = () => {
             disabled={!isMetaMaskReady}
           />
         )}
-        {shouldDisplayReconnectButton(installedSnap) && (
-          <Card
-            content={{
-              title: 'Reconnect',
-              description:
-                'Update the SNAP after making local changes.',
-              button: (
-                <ReconnectButton
-                  onClick={requestSnap}
-                  disabled={!installedSnap}
-                />
-              ),
-            }}
-            disabled={!installedSnap}
-          />
-        )}
 
-        {/* Test Cards for SNAP Methods */}
+        {/* Test Scenario 1: Known safe token (USDC) */}
         <Card
           content={{
-            title: 'Free Tier: CRITICAL Risk',
+            title: 'Test: Known Safe Token',
             description:
-              'Test the free tier warning screen with BLOCKED_BY_CONTRACT (honeypot) status.',
+              'Scans USDC. Expected: VERIFIED / LOW risk. No funds or signing required.',
             button: (
               <TestButton
-                label="Show Warning"
-                onClick={() => handleShowWarning('BLOCKED_BY_CONTRACT')}
+                label="Test Safe Token"
+                onClick={() => handleAnalyzeToken(USDC)}
                 disabled={!installedSnap}
               />
             ),
           }}
           disabled={!installedSnap}
         />
+
+        {/* Test Scenario 2: Risky / honeypot token (USDT) */}
         <Card
           content={{
-            title: 'Free Tier: HIGH Risk',
+            title: 'Test: Risky / Honeypot Token',
             description:
-              'Test the free tier warning screen with UNVERIFIED status.',
+              'Scans USDT. Expected: BLOCKED_BY_CONTRACT / CRITICAL risk. No funds or signing required.',
             button: (
               <TestButton
-                label="Show Warning"
+                label="Test Honeypot Token"
+                onClick={() => handleAnalyzeToken(USDT)}
+                disabled={!installedSnap}
+              />
+            ),
+          }}
+          disabled={!installedSnap}
+        />
+
+        {/* Test Scenario 3: Unverifiable token (backend fallback) */}
+        <Card
+          content={{
+            title: 'Test: Unverifiable Token',
+            description:
+              'Simulates a token the backend cannot verify. Expected: UNVERIFIED / HIGH risk. No funds or signing required.',
+            button: (
+              <TestButton
+                label="Test Unverifiable Token"
                 onClick={() => handleShowWarning('UNVERIFIED')}
                 disabled={!installedSnap}
               />
@@ -222,74 +221,15 @@ const Index = () => {
           }}
           disabled={!installedSnap}
         />
-        <Card
-          content={{
-            title: 'Free Tier: LOW Risk',
-            description:
-              'Test the free tier warning screen with VERIFIED status.',
-            button: (
-              <TestButton
-                label="Show Warning"
-                onClick={() => handleShowWarning('VERIFIED')}
-                disabled={!installedSnap}
-              />
-            ),
-          }}
-          disabled={!installedSnap}
-        />
-        <Card
-          content={{
-            title: 'Paid Tier: Full Analysis',
-            description:
-              'Test the paid tier analysis screen with detailed explanations.',
-            button: (
-              <TestButton
-                label="Show Analysis"
-                onClick={() => handleShowAnalysis('BLOCKED_BY_CONTRACT')}
-                disabled={!installedSnap}
-              />
-            ),
-          }}
-          disabled={!installedSnap}
-        />
-        <Card
-          content={{
-            title: 'Risk Acknowledgement',
-            description:
-              'Test the "Proceed Anyway" acknowledgement screen.',
-            button: (
-              <TestButton
-                label="Show Acknowledgement"
-                onClick={handleShowAcknowledgement}
-                disabled={!installedSnap}
-              />
-            ),
-          }}
-          disabled={!installedSnap}
-        />
-        <Card
-          content={{
-            title: 'Analyze Token',
-            description:
-              'Test the full token analysis flow (mock data).',
-            button: (
-              <TestButton
-                label="Analyze Token"
-                onClick={handleAnalyzeToken}
-                disabled={!installedSnap}
-              />
-            ),
-          }}
-          disabled={!installedSnap}
-        />
-
-        <Notice>
-          <p>
-            <b>Note:</b> This is a development environment. The SNAP uses mock data.
-            Backend integration with Crypto Intel is not yet connected.
-          </p>
-        </Notice>
       </CardContainer>
+
+      <Notice>
+        <p>
+          <b>No funds required.</b> All buttons use wallet_invokeSnap.
+          No transactions are signed, no gas is estimated, and no ETH
+          (mainnet or testnet) is needed. This SNAP is advisory only.
+        </p>
+      </Notice>
     </Container>
   );
 };
