@@ -1,10 +1,10 @@
 {
-  "name": "@anthropic/crypto-guardian-snap",
+  "name": "@taker007/crypto-guardian-snap",
   "version": "1.0.0",
   "description": "Crypto Guardian - Risk signals for Ethereum tokens. Advisory only.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/taker007/crypto-intel.git"
+    "url": "https://github.com/taker007/crypto-guardian.git"
   },
   "license": "(MIT-0 OR Apache-2.0)",
   "main": "./dist/bundle.js",
