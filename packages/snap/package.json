@@ -1,6 +1,6 @@
 {
   "name": "@taker007/crypto-guardian-snap",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Crypto Guardian - Risk signals for Ethereum tokens. Advisory only.",
   "repository": {
     "type": "git",

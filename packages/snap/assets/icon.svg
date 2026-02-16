@@ -1,58 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="shieldFace" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#C9A24E"/>
-      <stop offset="35%" stop-color="#A67C32"/>
-      <stop offset="65%" stop-color="#7A5A1E"/>
-      <stop offset="100%" stop-color="#5C4116"/>
-    </linearGradient>
-    <linearGradient id="shieldRim" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#E8D48B"/>
-      <stop offset="50%" stop-color="#B8912A"/>
-      <stop offset="100%" stop-color="#8B6914"/>
-    </linearGradient>
-    <radialGradient id="forgeGlow" cx="0.4" cy="0.35" r="0.6">
-      <stop offset="0%" stop-color="#DABB6A" stop-opacity="0.4"/>
-      <stop offset="100%" stop-color="#7A5A1E" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="letterMetal" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FFF5D4"/>
-      <stop offset="30%" stop-color="#E8D48B"/>
-      <stop offset="70%" stop-color="#C9A24E"/>
-      <stop offset="100%" stop-color="#F0E0A0"/>
-    </linearGradient>
-    <filter id="shadow" x="-5%" y="-5%" width="115%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#2A1A00" flood-opacity="0.5"/>
-    </filter>
-  </defs>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
 
-  <!-- Outer shield (rim) -->
-  <path d="M256 22C140 22 58 56 58 56L58 230C58 340 150 440 256 490C362 440 454 340 454 230L454 56C454 56 372 22 256 22Z"
-        fill="url(#shieldRim)" filter="url(#shadow)"/>
+  <!-- Background -->
+  <rect width="256" height="256" fill="#0B1220"></rect>
 
-  <!-- Inner shield face -->
-  <path d="M256 42C152 42 78 72 78 72L78 226C78 326 162 418 256 464C350 418 434 326 434 226L434 72C434 72 360 42 256 42Z"
-        fill="url(#shieldFace)"/>
+  <!-- Shield outline -->
+  <path d="M128 20
+       L200 60
+       L200 130
+       C200 180 165 215 128 236
+       C91 215 56 180 56 130
+       L56 60
+       Z" fill="none" stroke="#3B82F6" stroke-width="8"></path>
 
-  <!-- Forge glow -->
-  <path d="M256 42C152 42 78 72 78 72L78 226C78 326 162 418 256 464C350 418 434 326 434 226L434 72C434 72 360 42 256 42Z"
-        fill="url(#forgeGlow)"/>
+  <!-- Network nodes -->
+  <circle cx="128" cy="95" r="8" fill="#3B82F6"></circle>
+  <circle cx="90" cy="135" r="6" fill="#3B82F6"></circle>
+  <circle cx="166" cy="135" r="6" fill="#3B82F6"></circle>
+  <circle cx="128" cy="165" r="6" fill="#3B82F6"></circle>
 
-  <!-- Decorative bars -->
-  <rect x="118" y="148" width="276" height="5" rx="2.5" fill="#5C4116" opacity="0.45"/>
-  <rect x="118" y="340" width="276" height="5" rx="2.5" fill="#5C4116" opacity="0.45"/>
+  <!-- Network lines -->
+  <line x1="128" y1="95" x2="90" y2="135" stroke="#3B82F6" stroke-width="4"></line>
+  <line x1="128" y1="95" x2="166" y2="135" stroke="#3B82F6" stroke-width="4"></line>
+  <line x1="90" y1="135" x2="128" y2="165" stroke="#3B82F6" stroke-width="4"></line>
+  <line x1="166" y1="135" x2="128" y2="165" stroke="#3B82F6" stroke-width="4"></line>
 
-  <!-- Rivets -->
-  <circle cx="130" cy="102" r="7" fill="#B8912A" stroke="#8B6914" stroke-width="2"/>
-  <circle cx="382" cy="102" r="7" fill="#B8912A" stroke="#8B6914" stroke-width="2"/>
-  <circle cx="142" cy="280" r="7" fill="#B8912A" stroke="#8B6914" stroke-width="2"/>
-  <circle cx="370" cy="280" r="7" fill="#B8912A" stroke="#8B6914" stroke-width="2"/>
+  <!-- Checkmark -->
+  <path d="M105 135 L120 150 L150 115" fill="none" stroke="#22C55E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path>
 
-  <!-- Letter G as path (serif, forged metal) -->
-  <path d="M296 248L296 272L260 272L260 310L296 310L296 296L320 296L320 330
-           C306 348 280 360 256 360C208 360 170 320 170 256C170 192 208 152 256 152
-           C284 152 308 164 324 184L302 204C290 190 274 180 256 180
-           C226 180 200 210 200 256C200 302 226 332 256 332
-           C272 332 286 326 296 316L296 280L260 280L260 248Z"
-        fill="url(#letterMetal)" stroke="#5C4116" stroke-width="4" stroke-linejoin="round"/>
 </svg>
