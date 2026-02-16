@@ -1,30 +1,5 @@
-<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-
-  <!-- Background -->
-  <rect width="256" height="256" fill="#0B1220"></rect>
-
-  <!-- Shield outline -->
-  <path d="M128 20
-       L200 60
-       L200 130
-       C200 180 165 215 128 236
-       C91 215 56 180 56 130
-       L56 60
-       Z" fill="none" stroke="#3B82F6" stroke-width="8"></path>
-
-  <!-- Network nodes -->
-  <circle cx="128" cy="95" r="8" fill="#3B82F6"></circle>
-  <circle cx="90" cy="135" r="6" fill="#3B82F6"></circle>
-  <circle cx="166" cy="135" r="6" fill="#3B82F6"></circle>
-  <circle cx="128" cy="165" r="6" fill="#3B82F6"></circle>
-
-  <!-- Network lines -->
-  <line x1="128" y1="95" x2="90" y2="135" stroke="#3B82F6" stroke-width="4"></line>
-  <line x1="128" y1="95" x2="166" y2="135" stroke="#3B82F6" stroke-width="4"></line>
-  <line x1="90" y1="135" x2="128" y2="165" stroke="#3B82F6" stroke-width="4"></line>
-  <line x1="166" y1="135" x2="128" y2="165" stroke="#3B82F6" stroke-width="4"></line>
-
-  <!-- Checkmark -->
-  <path d="M105 135 L120 150 L150 115" fill="none" stroke="#22C55E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<rect width="256" height="256" rx="48" fill="#0B0F1A"/>
+<path d="M128 24 L212 64 V128 C212 180 172 220 128 232 C84 220 44 180 44 128 V64 Z" fill="#14F195"/>
+<circle cx="128" cy="120" r="36" fill="#0B0F1A"/>
 </svg>
