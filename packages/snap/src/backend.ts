@@ -7,7 +7,7 @@
 // =============================================================================
 
 /**
- * Intelligence enrichment data from the 9-source aggregator
+ * Intelligence enrichment data from the 11-source aggregator
  */
 export interface IntelEnrichment {
   riskScore: number;          // 0-100, higher = riskier
@@ -22,7 +22,7 @@ export interface IntelEnrichment {
   creatorAddress: string | null;
   sourcesAvailable: number;
   sourcesTotal: number;
-  sourceNames: string[];      // e.g. ['GoPlus', 'DexScreener', 'Birdeye']
+  sourceNames: string[];      // e.g. ['GoPlus', 'DexScreener', 'Birdeye', 'Honeypot.is', 'TokenSniffer']
   reportStatus?: 'READY' | 'PROCESSING' | 'FAILED';  // Only present in /api/intel/report responses
 }
 
