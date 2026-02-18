@@ -10,7 +10,7 @@ import cors from 'cors';
 import intelReportRoutes from './routes/intelReport';
 
 const app = express();
-const PORT = 4008; // Registered in ~/.port-registry for crypto-guardian/api
+const PORT = parseInt(process.env.PORT || '4008', 10); // Registered in ~/.port-registry for crypto-guardian/api
 
 app.use(cors());
 app.use(express.json());
@@ -21,6 +21,15 @@ app.use('/api/intel', intelReportRoutes);
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'crypto-guardian-api', timestamp: Date.now() });
+});
+
+// Aliases for nginx proxy rewrite
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', service: 'crypto-guardian-api', timestamp: Date.now() });
+});
+
+app.get('/ready', (_req, res) => {
+  res.json({ status: 'ok' });
 });
 
 export function startServer(port: number = PORT): void {
