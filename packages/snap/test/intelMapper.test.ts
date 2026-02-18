@@ -19,6 +19,7 @@ function makeIntel(overrides: Partial<IntelEnrichment> = {}): IntelEnrichment {
     sourcesAvailable: 5,
     sourcesTotal: 9,
     sourceNames: ['goplus', 'dexscreener', 'blockExplorer', 'coingecko', 'birdeye'],
+    reportStatus: 'READY',
     ...overrides,
   };
 }

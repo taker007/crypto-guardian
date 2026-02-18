@@ -23,6 +23,7 @@ export interface IntelEnrichment {
   sourcesAvailable: number;
   sourcesTotal: number;
   sourceNames: string[];      // e.g. ['GoPlus', 'DexScreener', 'Birdeye']
+  reportStatus: 'READY' | 'PROCESSING' | 'FAILED';  // Deep report pipeline status
 }
 
 /**
