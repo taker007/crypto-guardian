@@ -5,6 +5,7 @@ import type { RiskLevel, Tradeability, TokenAnalysis } from './types';
 import { getCopy, getDynamicCopy, COPY_MODE } from './copy';
 import { fetchRiskFromCryptoIntel } from './backend';
 import type { ScanResponse } from './backend';
+import { mapIntelToObservations } from './intelMapper';
 
 // =============================================================================
 // CRYPTO GUARDIAN SNAP - UI IMPLEMENTATION
@@ -87,11 +88,24 @@ function mapScanToAnalysis(scan: ScanResponse | null): TokenAnalysis {
     return FALLBACK_ANALYSIS;
   }
 
-  return {
+  const base: TokenAnalysis = {
     riskLevel: mapRiskLevel(scan.risk.level),
     tradeability: mapTradeability(scan.risk.tradeability),
     warnings: scan.risk.warnings,
   };
+
+  // Enrich with intelligence data if available
+  if (scan.intel) {
+    const { observations } = mapIntelToObservations(scan.intel);
+    base.tokenName = scan.intel.tokenName;
+    base.tokenSymbol = scan.intel.tokenSymbol;
+    base.confidencePercent = scan.intel.confidenceScore;
+    base.sourcesUsed = scan.intel.sourcesAvailable;
+    base.intelObservations = observations;
+    base.recommendation = scan.intel.recommendation;
+  }
+
+  return base;
 }
 
 /**
@@ -113,6 +127,18 @@ function renderFreeTierWarning(analysis: TokenAnalysis) {
       <Row label={c.labelTradeability}>
         <Text><Bold>{getTradeabilityLabel(analysis.tradeability)}</Bold></Text>
       </Row>
+
+      {analysis.confidencePercent !== undefined && (
+        <Row label={c.labelConfidence}>
+          <Text><Bold>{analysis.confidencePercent}%</Bold></Text>
+        </Row>
+      )}
+
+      {analysis.sourcesUsed !== undefined && (
+        <Row label={c.labelSources}>
+          <Text><Bold>{analysis.sourcesUsed} checked</Bold></Text>
+        </Row>
+      )}
 
       <Divider />
 
@@ -155,6 +181,18 @@ function renderPaidTierAnalysis(analysis: TokenAnalysis) {
         <Text><Bold>{getTradeabilityLabel(analysis.tradeability)}</Bold></Text>
       </Row>
 
+      {analysis.confidencePercent !== undefined && (
+        <Row label={c.labelConfidence}>
+          <Text><Bold>{analysis.confidencePercent}%</Bold></Text>
+        </Row>
+      )}
+
+      {analysis.sourcesUsed !== undefined && (
+        <Row label={c.labelSources}>
+          <Text><Bold>{analysis.sourcesUsed} checked</Bold></Text>
+        </Row>
+      )}
+
       <Divider />
 
       {analysis.reason && (
@@ -176,6 +214,15 @@ function renderPaidTierAnalysis(analysis: TokenAnalysis) {
           <Text><Bold>{c.sectionObservations}</Bold></Text>
           {analysis.observations.map((obs, _index) => (
             <Text key={`obs-${obs.substring(0, 10)}`}>• {obs}</Text>
+          ))}
+        </Box>
+      )}
+
+      {analysis.intelObservations && analysis.intelObservations.length > 0 && (
+        <Box>
+          <Text><Bold>{c.sectionIntelObservations}</Bold></Text>
+          {analysis.intelObservations.map((obs, _index) => (
+            <Text key={`intel-${obs.substring(0, 10)}`}>• {obs}</Text>
           ))}
         </Box>
       )}

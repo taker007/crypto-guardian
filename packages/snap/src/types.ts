@@ -23,4 +23,11 @@ export interface TokenAnalysis {
   meaning?: string;
   observations?: string[];
   warnings?: string[];
+  // Intelligence-enriched fields (optional, from aggregator)
+  tokenName?: string;
+  tokenSymbol?: string;
+  confidencePercent?: number;    // 0-100
+  sourcesUsed?: number;
+  intelObservations?: string[];  // Real observations from risk flags
+  recommendation?: string;       // 'SAFE' | 'CAUTION' | 'DANGEROUS'
 }
