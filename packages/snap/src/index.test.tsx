@@ -1,33 +1,30 @@
 import { expect } from '@jest/globals';
 import type { SnapConfirmationInterface } from '@metamask/snaps-jest';
 import { installSnap } from '@metamask/snaps-jest';
-import { Box, Text, Bold } from '@metamask/snaps-sdk/jsx';
 
 describe('onRpcRequest', () => {
-  describe('hello', () => {
+  describe('getCopyMode', () => {
+    it('returns the current copy mode', async () => {
+      const { request } = await installSnap();
+
+      const response = await request({
+        method: 'getCopyMode',
+      });
+
+      expect(response).toRespondWith({ mode: expect.stringMatching(/^(formal|plain)$/) });
+    });
+  });
+
+  describe('showWarning', () => {
     it('shows a confirmation dialog', async () => {
       const { request } = await installSnap();
 
-      const origin = 'Jest';
       const response = request({
-        method: 'hello',
-        origin,
+        method: 'showWarning',
       });
 
       const ui = (await response.getInterface()) as SnapConfirmationInterface;
       expect(ui.type).toBe('confirmation');
-      expect(ui).toRender(
-        <Box>
-          <Text>
-            Hello, <Bold>{origin}</Bold>!
-          </Text>
-          <Text>This custom confirmation is just for display purposes.</Text>
-          <Text>
-            But you can edit the snap source code to make it do something, if
-            you want to!
-          </Text>
-        </Box>,
-      );
 
       await ui.ok();
 
@@ -44,7 +41,7 @@ describe('onRpcRequest', () => {
 
     expect(response).toRespondWithError({
       code: -32603,
-      message: 'Method not found.',
+      message: 'Method not found: foo',
       stack: expect.any(String),
     });
   });
