@@ -7,6 +7,24 @@
 // =============================================================================
 
 /**
+ * Intelligence enrichment data from the 9-source aggregator
+ */
+export interface IntelEnrichment {
+  riskScore: number;          // 0-100, higher = riskier
+  confidenceScore: number;    // 0-100, how confident
+  recommendation: string;     // 'SAFE' | 'CAUTION' | 'DANGEROUS'
+  tokenName: string;
+  tokenSymbol: string;
+  riskFlags: string[];        // e.g. ['HONEYPOT_RISK', 'LOW_LIQUIDITY']
+  scamIndicators: string[];
+  liquidityUsd: number;
+  isVerified: boolean;
+  creatorAddress: string | null;
+  sourcesAvailable: number;
+  sourcesTotal: number;
+}
+
+/**
  * Shape of the /api/scan response from Crypto Intel
  */
 export interface ScanResponse {
@@ -24,6 +42,7 @@ export interface ScanResponse {
     tradeability: string;
     warnings: string[];
   };
+  intel?: IntelEnrichment | null;
   cache?: {
     hit: boolean;
   };

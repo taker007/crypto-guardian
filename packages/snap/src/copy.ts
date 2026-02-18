@@ -37,6 +37,11 @@ export const copy = {
     // Row labels
     labelRiskLevel: "Risk Level",
     labelTradeability: "Tradeability",
+    labelConfidence: "Confidence",
+    labelSources: "Intel Sources",
+
+    // Section labels (intel)
+    sectionIntelObservations: "INTELLIGENCE FINDINGS",
 
     // Disclaimer text (appears on all screens)
     disclaimerAnalysis: "This analysis reflects on-chain behavior at the time of review and may change.",
@@ -67,6 +72,11 @@ export const copy = {
     // Row labels
     labelRiskLevel: "Risk Level",
     labelTradeability: "Can You Sell It?",
+    labelConfidence: "How Sure We Are",
+    labelSources: "Sources Checked",
+
+    // Section labels (intel)
+    sectionIntelObservations: "WHAT OUR SOURCES FOUND",
 
     // Disclaimer text (appears on all screens)
     disclaimerAnalysis: "This is based on what we can see right now. Things can change later.",
