@@ -22,6 +22,7 @@ export interface IntelEnrichment {
   creatorAddress: string | null;
   sourcesAvailable: number;
   sourcesTotal: number;
+  sourceNames: string[];      // e.g. ['GoPlus', 'DexScreener', 'Birdeye']
 }
 
 /**

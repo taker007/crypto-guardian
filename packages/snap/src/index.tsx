@@ -1,11 +1,11 @@
 import type { OnRpcRequestHandler } from '@metamask/snaps-sdk';
-import { Box, Text, Bold, Divider, Heading, Row } from '@metamask/snaps-sdk/jsx';
+import { Box, Text, Bold, Divider, Heading, Row, Link } from '@metamask/snaps-sdk/jsx';
 
 import type { RiskLevel, Tradeability, TokenAnalysis } from './types';
 import { getCopy, getDynamicCopy, COPY_MODE } from './copy';
 import { fetchRiskFromCryptoIntel } from './backend';
 import type { ScanResponse } from './backend';
-import { mapIntelToObservations } from './intelMapper';
+import { mapIntelToObservations, buildIntelReportUrl } from './intelMapper';
 
 // =============================================================================
 // CRYPTO GUARDIAN SNAP - UI IMPLEMENTATION
@@ -96,13 +96,17 @@ function mapScanToAnalysis(scan: ScanResponse | null): TokenAnalysis {
 
   // Enrich with intelligence data if available
   if (scan.intel) {
-    const { observations } = mapIntelToObservations(scan.intel);
+    const { observations, riskSummary, confidenceExplanation } = mapIntelToObservations(scan.intel);
     base.tokenName = scan.intel.tokenName;
     base.tokenSymbol = scan.intel.tokenSymbol;
     base.confidencePercent = scan.intel.confidenceScore;
     base.sourcesUsed = scan.intel.sourcesAvailable;
+    base.sourceNames = scan.intel.sourceNames;
     base.intelObservations = observations;
     base.recommendation = scan.intel.recommendation;
+    base.riskSummary = riskSummary;
+    base.confidenceExplanation = confidenceExplanation;
+    base.intelReportUrl = buildIntelReportUrl(scan.token, scan.chainId);
   }
 
   return base;
@@ -140,7 +144,29 @@ function renderFreeTierWarning(analysis: TokenAnalysis) {
         </Row>
       )}
 
+      {analysis.riskSummary && (
+        <Box>
+          <Divider />
+          <Text><Bold>{c.sectionRiskSummary}</Bold></Text>
+          <Text>{analysis.riskSummary}</Text>
+        </Box>
+      )}
+
+      {analysis.confidenceExplanation && (
+        <Text>{analysis.confidenceExplanation}</Text>
+      )}
+
+      {analysis.sourceNames && analysis.sourceNames.length > 0 && (
+        <Text>{c.labelSourcesUsed}: {analysis.sourceNames.join(', ')}</Text>
+      )}
+
       <Divider />
+
+      {analysis.intelReportUrl && (
+        <Text>
+          <Link href={analysis.intelReportUrl}>{c.linkIntelReport}</Link>
+        </Text>
+      )}
 
       <Text>
         {c.disclaimerAnalysis}
@@ -193,6 +219,22 @@ function renderPaidTierAnalysis(analysis: TokenAnalysis) {
         </Row>
       )}
 
+      {analysis.riskSummary && (
+        <Box>
+          <Divider />
+          <Text><Bold>{c.sectionRiskSummary}</Bold></Text>
+          <Text>{analysis.riskSummary}</Text>
+        </Box>
+      )}
+
+      {analysis.confidenceExplanation && (
+        <Text>{analysis.confidenceExplanation}</Text>
+      )}
+
+      {analysis.sourceNames && analysis.sourceNames.length > 0 && (
+        <Text>{c.labelSourcesUsed}: {analysis.sourceNames.join(', ')}</Text>
+      )}
+
       <Divider />
 
       {analysis.reason && (
@@ -228,6 +270,14 @@ function renderPaidTierAnalysis(analysis: TokenAnalysis) {
       )}
 
       <Divider />
+
+      {analysis.intelReportUrl && (
+        <Text>
+          <Link href={analysis.intelReportUrl}>{c.linkIntelReport}</Link>
+        </Text>
+      )}
+
+      <Text>{c.proPrompt}</Text>
 
       <Text>
         {c.disclaimerAnalysis}

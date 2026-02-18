@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Guardian - Intelligence Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; }
+    .report { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    header { text-align: center; margin-bottom: 2rem; }
+    header h1 { color: #58a6ff; font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .subtitle { font-size: 1.2rem; color: #f0f6fc; }
+    .meta { font-size: 0.85rem; color: #8b949e; margin-top: 0.5rem; }
+    section { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    h2 { color: #58a6ff; font-size: 1.2rem; margin-bottom: 1rem; border-bottom: 1px solid #21262d; padding-bottom: 0.5rem; }
+    .risk-overview { display: flex; gap: 2rem; align-items: center; }
+    .risk-score { width: 100px; height: 100px; border-radius: 50%; border: 4px solid; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+    .score-value { font-size: 2rem; font-weight: bold; color: #f0f6fc; }
+    .score-label { font-size: 0.75rem; color: #8b949e; }
+    .risk-details { flex: 1; }
+    .detail-row { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #21262d; }
+    .detail-row:last-child { border-bottom: none; }
+    .label { color: #8b949e; }
+    .value { color: #c9d1d9; }
+    .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85rem; word-break: break-all; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .card { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; text-align: center; }
+    .card-label { display: block; font-size: 0.8rem; color: #8b949e; margin-bottom: 0.3rem; }
+    .card-value { display: block; font-size: 1.1rem; font-weight: 600; color: #f0f6fc; }
+    .flag-item { background: #3d1f1f; border: 1px solid #6e3030; border-radius: 4px; padding: 0.4rem 0.8rem; margin: 0.3rem 0; list-style: none; color: #f85149; font-size: 0.9rem; }
+    .flag-item.scam { background: #3d1f2e; border-color: #6e3050; color: #ff7b72; }
+    .pro-section { background: #1a1f2e; border-color: #3b4876; }
+    .pro-description { color: #8b949e; margin-bottom: 1rem; }
+    .pro-features { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+    .pro-feature { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 0.8rem; }
+    .pro-feature-label { display: block; color: #58a6ff; font-weight: 600; font-size: 0.9rem; }
+    .pro-feature-desc { display: block; color: #8b949e; font-size: 0.8rem; margin-top: 0.2rem; }
+    .pro-cta { display: inline-block; background: #238636; color: #fff; padding: 0.8rem 2rem; border-radius: 6px; text-decoration: none; font-weight: 600; transition: background 0.2s; }
+    .pro-cta:hover { background: #2ea043; }
+    footer { text-align: center; padding: 2rem 0; color: #8b949e; font-size: 0.8rem; }
+    .loading, .error { text-align: center; padding: 4rem 2rem; color: #8b949e; }
+    .error h2 { color: #f85149; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr 1fr; } .risk-overview { flex-direction: column; } .pro-features { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script src="pages/IntelReport.js"></script>
+</body>
+</html>

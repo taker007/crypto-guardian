@@ -1,4 +1,4 @@
-import { mapIntelToObservations } from '../src/intelMapper';
+import { mapIntelToObservations, buildIntelReportUrl } from '../src/intelMapper';
 import type { IntelEnrichment } from '../src/backend';
 
 // COPY_MODE is 'plain' in copy.ts — tests run against plain mode by default.
@@ -18,6 +18,7 @@ function makeIntel(overrides: Partial<IntelEnrichment> = {}): IntelEnrichment {
     creatorAddress: null,
     sourcesAvailable: 5,
     sourcesTotal: 9,
+    sourceNames: ['goplus', 'dexscreener', 'blockExplorer', 'coingecko', 'birdeye'],
     ...overrides,
   };
 }
@@ -144,6 +145,59 @@ describe('mapIntelToObservations', () => {
     expect(result.observations).toContain('This token may trap your funds');
     expect(result.observations).toContain('Very high fees when buying/selling');
     expect(result.observations).toHaveLength(2);
+  });
+
+  // 13. Returns riskSummary for DANGEROUS recommendation
+  it('returns appropriate risk summary for DANGEROUS recommendation', () => {
+    const result = mapIntelToObservations(
+      makeIntel({ recommendation: 'DANGEROUS', riskScore: 85, riskFlags: ['HONEYPOT_RISK', 'LOW_LIQUIDITY'] }),
+    );
+    expect(result.riskSummary).toContain('warning signs');
+    expect(result.riskSummary).toContain('2 risk indicators');
+  });
+
+  // 14. Returns riskSummary for CAUTION recommendation
+  it('returns appropriate risk summary for CAUTION recommendation', () => {
+    const result = mapIntelToObservations(
+      makeIntel({ recommendation: 'CAUTION', riskScore: 45, riskFlags: ['LOW_LIQUIDITY'] }),
+    );
+    expect(result.riskSummary).toContain('some risk indicators');
+  });
+
+  // 15. Returns riskSummary for SAFE recommendation
+  it('returns appropriate risk summary for SAFE recommendation', () => {
+    const result = mapIntelToObservations(
+      makeIntel({ recommendation: 'SAFE', riskScore: 10, riskFlags: [] }),
+    );
+    expect(result.riskSummary).toContain('No major risk indicators');
+  });
+
+  // 16. Returns confidenceExplanation
+  it('returns confidence explanation with source count', () => {
+    const result = mapIntelToObservations(
+      makeIntel({ confidenceScore: 87, sourcesAvailable: 7 }),
+    );
+    expect(result.confidenceExplanation).toBe('Confidence: 87% based on 7 intelligence sources.');
+  });
+
+  // 17. Singular source in confidence explanation
+  it('uses singular form for 1 source', () => {
+    const result = mapIntelToObservations(
+      makeIntel({ confidenceScore: 30, sourcesAvailable: 1 }),
+    );
+    expect(result.confidenceExplanation).toBe('Confidence: 30% based on 1 intelligence source.');
+  });
+});
+
+describe('buildIntelReportUrl', () => {
+  it('builds correct URL with default chain', () => {
+    const url = buildIntelReportUrl('0xABC123');
+    expect(url).toBe('https://cryptoguardians.io/intel/0xABC123?chain=eth');
+  });
+
+  it('builds correct URL with specified chain', () => {
+    const url = buildIntelReportUrl('0xDEF456', 'sol');
+    expect(url).toBe('https://cryptoguardians.io/intel/0xDEF456?chain=sol');
   });
 });
 

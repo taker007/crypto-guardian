@@ -10,6 +10,9 @@ import type { IntelEnrichment } from './backend';
 
 export interface ObservationResult {
   observations: string[];
+  riskSummary: string;
+  confidenceExplanation: string;
+  intelReportUrl: string | null;
 }
 
 const FLAG_MAP: Record<string, { formal: string; plain: string }> = {
@@ -23,10 +26,70 @@ const FLAG_MAP: Record<string, { formal: string; plain: string }> = {
   'MINT_AUTHORITY_PRESENT':   { formal: 'Mint authority retained — supply can increase',  plain: 'Owner can create more tokens anytime' },
   'FREEZE_AUTHORITY_PRESENT': { formal: 'Freeze authority present — accounts can be frozen', plain: 'Owner can freeze your tokens' },
   'HIGH_HOLDER_CONCENTRATION': { formal: 'Top holders control large supply percentage',  plain: 'A few wallets hold most of the supply' },
+  'EXTREME_HOLDER_CONCENTRATION': { formal: 'Extreme holder concentration detected',     plain: 'A tiny number of wallets control most tokens' },
   'CREATOR_IS_NEW_WALLET':   { formal: 'Creator wallet has no prior history',            plain: 'Created by a brand-new wallet' },
   'LP_NOT_LOCKED':           { formal: 'Liquidity pool is not locked',                   plain: 'Liquidity can be pulled at any time' },
   'RUGCHECK_HIGH_RISK':      { formal: 'RugCheck: High rugpull risk score',              plain: 'High risk of being a rug pull' },
+  'VERY_FEW_HOLDERS':        { formal: 'Token has very few holders',                     plain: 'Almost nobody holds this token' },
+  'TOKEN_2022':              { formal: 'Token uses Token-2022 program extensions',        plain: 'Token uses newer program with extra features' },
 };
+
+// Source name mapping for display
+const SOURCE_NAMES: Record<string, string> = {
+  goplus: 'GoPlus',
+  dexscreener: 'DexScreener',
+  blockExplorer: 'BlockExplorer',
+  coingecko: 'CoinGecko',
+  helius: 'Helius',
+  solscan: 'Solscan',
+  debank: 'Debank',
+  birdeye: 'Birdeye',
+  rugcheck: 'RugCheck',
+};
+
+const INTEL_REPORT_BASE = 'https://cryptoguardians.io/intel';
+
+/**
+ * Generate a human-readable risk summary based on recommendation and risk score.
+ */
+function buildRiskSummary(intel: IntelEnrichment): string {
+  const flagCount = intel.riskFlags.length + intel.scamIndicators.length;
+
+  if (intel.recommendation === 'DANGEROUS' || intel.riskScore >= 70) {
+    return COPY_MODE === 'formal'
+      ? `This token exhibits multiple high-risk indicators including ${flagCount > 0 ? `${flagCount} risk flags` : 'elevated risk patterns'}. Exercise extreme caution.`
+      : `This token shows multiple warning signs${flagCount > 0 ? ` including ${flagCount} risk indicators` : ''}. Be very careful.`;
+  }
+
+  if (intel.recommendation === 'CAUTION' || intel.riskScore >= 30) {
+    return COPY_MODE === 'formal'
+      ? `This token has moderate risk indicators${flagCount > 0 ? ` (${flagCount} flags detected)` : ''}. Review carefully before interacting.`
+      : `This token has some risk indicators${flagCount > 0 ? ` (${flagCount} found)` : ''}. Review carefully before interacting.`;
+  }
+
+  return COPY_MODE === 'formal'
+    ? 'No major risk indicators detected based on available intelligence sources.'
+    : 'No major risk indicators detected based on available intelligence sources.';
+}
+
+/**
+ * Generate a confidence explanation string.
+ */
+function buildConfidenceExplanation(intel: IntelEnrichment): string {
+  const pct = intel.confidenceScore;
+  const srcCount = intel.sourcesAvailable;
+
+  return COPY_MODE === 'formal'
+    ? `Confidence: ${pct}% based on analysis from ${srcCount} intelligence source${srcCount !== 1 ? 's' : ''}.`
+    : `Confidence: ${pct}% based on ${srcCount} intelligence source${srcCount !== 1 ? 's' : ''}.`;
+}
+
+/**
+ * Build the full intelligence report URL for this token.
+ */
+export function buildIntelReportUrl(contractAddress: string, chain: string = 'eth'): string {
+  return `${INTEL_REPORT_BASE}/${contractAddress}?chain=${chain}`;
+}
 
 /**
  * Convert intel enrichment data into user-readable observation strings.
@@ -83,5 +146,19 @@ export function mapIntelToObservations(intel: IntelEnrichment): ObservationResul
     }
   }
 
-  return { observations };
+  return {
+    observations,
+    riskSummary: buildRiskSummary(intel),
+    confidenceExplanation: buildConfidenceExplanation(intel),
+    intelReportUrl: null, // URL is built per-token at render time
+  };
+}
+
+/**
+ * Get the display names for sources used in analysis.
+ */
+export function getSourceNames(sourceKeys: string[]): string[] {
+  return sourceKeys
+    .map((key) => SOURCE_NAMES[key] || key)
+    .filter(Boolean);
 }
