@@ -42,6 +42,10 @@ export const copy = {
 
     // Section labels (intel)
     sectionIntelObservations: "INTELLIGENCE FINDINGS",
+    sectionRiskSummary: "RISK ASSESSMENT",
+    labelSourcesUsed: "Sources Used",
+    linkIntelReport: "View Full Intelligence Report",
+    proPrompt: "Additional advanced intelligence available at cryptoguardians.io",
 
     // Disclaimer text (appears on all screens)
     disclaimerAnalysis: "This analysis reflects on-chain behavior at the time of review and may change.",
@@ -77,6 +81,10 @@ export const copy = {
 
     // Section labels (intel)
     sectionIntelObservations: "WHAT OUR SOURCES FOUND",
+    sectionRiskSummary: "WHAT WE THINK",
+    labelSourcesUsed: "Sources Used",
+    linkIntelReport: "View Full Intelligence Report",
+    proPrompt: "Want deeper analysis? Visit cryptoguardians.io",
 
     // Disclaimer text (appears on all screens)
     disclaimerAnalysis: "This is based on what we can see right now. Things can change later.",

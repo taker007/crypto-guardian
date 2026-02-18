@@ -28,6 +28,10 @@ export interface TokenAnalysis {
   tokenSymbol?: string;
   confidencePercent?: number;    // 0-100
   sourcesUsed?: number;
+  sourceNames?: string[];        // e.g. ['GoPlus', 'DexScreener', 'Birdeye']
   intelObservations?: string[];  // Real observations from risk flags
   recommendation?: string;       // 'SAFE' | 'CAUTION' | 'DANGEROUS'
+  riskSummary?: string;          // Human-readable risk summary
+  confidenceExplanation?: string; // e.g. "Confidence: 87% based on 7 sources"
+  intelReportUrl?: string;       // Link to full intel report
 }
