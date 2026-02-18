@@ -62,6 +62,9 @@ node_modules/
 # Yarn Integrity file
 .yarn-integrity
 
+# Generated compliance reports
+compliance-report.json
+
 # dotenv environment variables file
 .env
 .env.test
