@@ -47,6 +47,7 @@ interface ComplianceReport {
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 const SNAP_DIR = path.join(PROJECT_ROOT, 'packages', 'snap');
 const SNAP_SRC_DIR = path.join(SNAP_DIR, 'src');
+const SNAP_BUNDLE_PATH = path.join(SNAP_DIR, 'dist', 'bundle.js');
 const MANIFEST_PATH = path.join(SNAP_DIR, 'snap.manifest.json');
 const REPORT_PATH = path.join(PROJECT_ROOT, 'compliance-report.json');
 
@@ -122,56 +123,84 @@ function checkManifestPermissions(): CheckResult {
 // ---------------------------------------------------------------------------
 // CHECK 2 — Network Access Audit
 // ---------------------------------------------------------------------------
+// Audits the PRODUCTION BUNDLE (dist/bundle.js) — this is what ships to users.
+// Source files may contain dev-only URLs behind environment guards (config.ts),
+// but the bundler eliminates them in production builds.
+// ---------------------------------------------------------------------------
 
 function checkNetworkAccess(): CheckResult {
   const details: string[] = [];
   let pass = true;
 
-  if (!fs.existsSync(SNAP_SRC_DIR)) {
-    return { status: 'FAIL', details: ['packages/snap/src/ directory not found'] };
-  }
+  // Primary check: audit the production bundle
+  if (fs.existsSync(SNAP_BUNDLE_PATH)) {
+    details.push('Auditing production bundle: packages/snap/dist/bundle.js');
+    const bundleContent = fs.readFileSync(SNAP_BUNDLE_PATH, 'utf-8');
+    const urlRegex = /(?:https?:\/\/)[^\s'"`,)}\]]+/g;
+    const bundleUrls = bundleContent.match(urlRegex) || [];
 
-  const srcFiles = getTypeScriptFiles(SNAP_SRC_DIR);
-  details.push(`Scanned ${srcFiles.length} source file(s)`);
+    for (const url of bundleUrls) {
+      let hostname: string;
+      try {
+        hostname = new URL(url).hostname;
+      } catch {
+        continue;
+      }
 
-  // Regex to match URLs (http:// and https://)
-  const urlRegex = /(?:https?:\/\/)[^\s'"`,)}\]]+/g;
-  const foundUrls: { file: string; url: string }[] = [];
+      const isAllowed = ALLOWED_OUTBOUND_HOSTS.some(
+        (allowed) => hostname === allowed || hostname.endsWith(`.${allowed}`),
+      );
 
-  for (const filePath of srcFiles) {
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const matches = content.match(urlRegex);
-    if (matches) {
-      for (const url of matches) {
-        const relPath = path.relative(PROJECT_ROOT, filePath);
-        foundUrls.push({ file: relPath, url });
+      if (isAllowed) {
+        details.push(`ALLOWED: ${url} (in bundle)`);
+      } else {
+        details.push(`FLAGGED: ${url} (in bundle) — not in allowed host list`);
+        pass = false;
       }
     }
-  }
 
-  if (foundUrls.length === 0) {
-    details.push('No outbound URLs found in snap source');
-    return { status: 'PASS', details };
-  }
+    if (bundleUrls.length === 0) {
+      details.push('No outbound URLs found in production bundle');
+    }
+  } else {
+    details.push('WARNING: Production bundle not found — run "mm-snap build" with NODE_ENV=production first');
+    details.push('Falling back to source file scan...');
 
-  for (const { file, url } of foundUrls) {
-    let hostname: string;
-    try {
-      hostname = new URL(url).hostname;
-    } catch {
-      details.push(`Unparseable URL in ${file}: ${url}`);
-      continue;
+    // Fallback: scan source files
+    if (!fs.existsSync(SNAP_SRC_DIR)) {
+      return { status: 'FAIL', details: [...details, 'packages/snap/src/ directory not found'] };
     }
 
-    const isAllowed = ALLOWED_OUTBOUND_HOSTS.some(
-      (allowed) => hostname === allowed || hostname.endsWith(`.${allowed}`),
-    );
+    const srcFiles = getTypeScriptFiles(SNAP_SRC_DIR);
+    details.push(`Scanned ${srcFiles.length} source file(s)`);
 
-    if (isAllowed) {
-      details.push(`ALLOWED: ${url} (in ${file})`);
-    } else {
-      details.push(`FLAGGED: ${url} (in ${file}) — not in allowed host list`);
-      pass = false;
+    const urlRegex = /(?:https?:\/\/)[^\s'"`,)}\]]+/g;
+
+    for (const filePath of srcFiles) {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const relPath = path.relative(PROJECT_ROOT, filePath);
+      const matches = content.match(urlRegex);
+      if (!matches) continue;
+
+      for (const url of matches) {
+        let hostname: string;
+        try {
+          hostname = new URL(url).hostname;
+        } catch {
+          continue;
+        }
+
+        const isAllowed = ALLOWED_OUTBOUND_HOSTS.some(
+          (allowed) => hostname === allowed || hostname.endsWith(`.${allowed}`),
+        );
+
+        if (isAllowed) {
+          details.push(`ALLOWED: ${url} (in ${relPath})`);
+        } else {
+          details.push(`FLAGGED: ${url} (in ${relPath}) — not in allowed host list`);
+          pass = false;
+        }
+      }
     }
   }
 

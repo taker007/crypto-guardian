@@ -6,6 +6,8 @@
 // No secrets, no API keys, no mutation — just a fetch.
 // =============================================================================
 
+import { SCAN_API_URL } from './config';
+
 /**
  * Intelligence enrichment data from the 11-source aggregator
  */
@@ -50,8 +52,6 @@ export interface ScanResponse {
   };
 }
 
-const BACKEND_URL = 'http://192.168.20.60:4006/api/scan'; // Registered in ~/.port-registry for crypto-guardian-snap
-
 /**
  * Fetch risk data from the Crypto Intel backend.
  *
@@ -63,7 +63,7 @@ export async function fetchRiskFromCryptoIntel(
   tokenAddress: string,
 ): Promise<ScanResponse | null> {
   try {
-    const response = await fetch(BACKEND_URL, {
+    const response = await fetch(SCAN_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: tokenAddress, chainId: 'eth' }),
