@@ -1,4 +1,4 @@
-import type { OnRpcRequestHandler } from '@metamask/snaps-sdk';
+import type { OnRpcRequestHandler, OnTransactionHandler } from '@metamask/snaps-sdk';
 import { Box, Text, Bold, Divider, Heading, Row, Link } from '@metamask/snaps-sdk/jsx';
 
 import type { RiskLevel, Tradeability, TokenAnalysis } from './types';
@@ -6,13 +6,20 @@ import { getCopy, getDynamicCopy, COPY_MODE } from './copy';
 import { fetchRiskFromCryptoIntel } from './backend';
 import type { ScanResponse } from './backend';
 import { mapIntelToObservations, buildIntelReportUrl } from './intelMapper';
+import { simulateTransaction } from './simulationClient';
+import type { CompliantMessage } from './simulationClient';
+import { renderTxWarning, renderFallbackWarning } from './warningDialog';
 
 // =============================================================================
 // CRYPTO GUARDIAN SNAP - UI IMPLEMENTATION
 // =============================================================================
-// This SNAP provides risk signals for Ethereum tokens.
+// This SNAP provides risk signals for Ethereum tokens AND transaction warnings.
 // It is advisory only and does NOT block transactions.
 // Ethereum Mainnet only (v1).
+//
+// TRANSACTION INSIGHTS: The onTransaction handler intercepts pending transactions,
+// sends them to the simulation backend, and displays compliant risk warnings
+// in the MetaMask confirmation screen. The user always retains full control.
 //
 // COPY MODE: Toggle between 'formal' and 'plain' in copy.ts
 // Current mode: See COPY_MODE export in copy.ts
@@ -352,6 +359,7 @@ function getMockAnalysis(tradeability: Tradeability): TokenAnalysis {
  * - showAnalysis: Display paid tier analysis screen
  * - showAcknowledgement: Display risk acknowledgement screen
  * - analyzeToken: Analyze a token via Crypto Intel backend
+ * - simulateTransaction: Manually simulate a transaction and show warning dialog
  * - getCopyMode: Returns current copy mode ('formal' or 'plain')
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({
@@ -421,6 +429,41 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       });
     }
 
+    // Manually simulate a transaction and show confirmation dialog
+    case 'simulateTransaction': {
+      const params = request.params as {
+        from?: string;
+        to?: string;
+        data?: string;
+        value?: string;
+        chainId?: string;
+      } | undefined;
+
+      if (!params?.from || !params?.to) {
+        throw new Error('Both "from" and "to" addresses are required');
+      }
+
+      const message = await simulateTransaction({
+        from: params.from,
+        to: params.to,
+        data: params.data,
+        value: params.value,
+        chainId: params.chainId,
+      });
+
+      const content = message
+        ? renderTxWarning(message)
+        : renderFallbackWarning();
+
+      return snap.request({
+        method: 'snap_dialog',
+        params: {
+          type: 'confirmation',
+          content,
+        },
+      });
+    }
+
     // Return current copy mode (for debugging/testing)
     case 'getCopyMode': {
       return { mode: COPY_MODE };
@@ -429,4 +472,76 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
     default:
       throw new Error(`Method not found: ${request.method}`);
   }
+};
+
+// =============================================================================
+// TRANSACTION INSIGHTS — onTransaction Handler
+// =============================================================================
+// This handler fires automatically when the user initiates any transaction in
+// MetaMask. It sends the transaction to the simulation backend and returns
+// compliant warning content that MetaMask displays in the confirmation screen.
+//
+// COMPLIANCE:
+// - NEVER blocks the transaction — returns insights content only
+// - NEVER modifies the transaction
+// - Degrades gracefully if backend is unavailable (shows fallback)
+// - All warning text is pre-sanitized by the backend compliant engine
+// - Uses severity: 'critical' only for HIGH severity warnings
+// =============================================================================
+
+export const onTransaction: OnTransactionHandler = async ({
+  transaction,
+  chainId,
+}) => {
+  // Extract transaction fields (MetaMask provides hex-encoded strings)
+  const from = (transaction.from as string) || '';
+  const to = (transaction.to as string) || '';
+  const data = (transaction.data as string) || '0x';
+  const value = (transaction.value as string) || '0x0';
+
+  // Skip simulation for contract creation (no 'to' address)
+  if (!to) {
+    return {
+      content: renderFallbackWarning(),
+    };
+  }
+
+  // Parse chainId — MetaMask sends format like "eip155:1"
+  let chain = 'eth';
+  if (chainId) {
+    const parts = chainId.split(':');
+    const numericId = parts.length > 1 ? parts[1] : parts[0];
+    if (numericId === '1' || numericId === undefined) {
+      chain = 'eth';
+    }
+  }
+
+  // Call simulation backend (2s timeout, never throws)
+  const message = await simulateTransaction({
+    chainId: chain,
+    from,
+    to,
+    data,
+    value,
+  });
+
+  // Backend unavailable — show fallback
+  if (!message) {
+    return {
+      content: renderFallbackWarning(),
+    };
+  }
+
+  // HIGH severity — use MetaMask's critical warning overlay
+  if (message.severity === 'HIGH') {
+    return {
+      content: renderTxWarning(message),
+      severity: 'critical',
+    };
+  }
+
+  // MEDIUM, LOW, INFO — show insights panel (no blocking overlay)
+  return {
+    content: renderTxWarning(message),
+  };
 };
