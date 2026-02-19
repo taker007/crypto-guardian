@@ -1,13 +1,13 @@
 {
-  "version": "1.0.5",
-  "description": "Crypto Guardian provides risk signals for Ethereum tokens. Advisory only — does not block transactions.",
+  "version": "1.1.0",
+  "description": "Crypto Guardian provides risk signals for Ethereum tokens and transaction warnings. Advisory only — does not block transactions.",
   "proposedName": "Crypto Guardian",
   "repository": {
     "type": "git",
     "url": "https://github.com/taker007/crypto-guardian.git"
   },
   "source": {
-    "shasum": "do1nNiGDDvb3tFioMnUxvdPNUksraReEW/BGGfwW1fU=",
+    "shasum": "tw9oUmK4IUXnUTQfz41m4sNsoWXzb8zSkiNM1/8W8ks=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -22,7 +22,9 @@
     "endowment:rpc": {
       "dapps": true,
       "snaps": false
-    }
+    },
+    "endowment:transaction-insight": {},
+    "endowment:network-access": {}
   },
   "platformVersion": "10.3.0",
   "manifestVersion": "0.1"

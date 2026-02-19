@@ -12,3 +12,4 @@ export const API_BASE_URL =
     : 'http://192.168.20.60:4006';
 
 export const SCAN_API_URL = `${API_BASE_URL}/api/scan`;
+export const TX_SIM_API_URL = `${API_BASE_URL}/api/tx/simulate`;
