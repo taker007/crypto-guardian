@@ -12,7 +12,7 @@ function makeIntel(overrides: Partial<IntelEnrichment> = {}): IntelEnrichment {
     tokenName: '',
     tokenSymbol: '',
     riskFlags: [],
-    scamIndicators: [],
+    harmIndicators: [],
     liquidityUsd: 0,
     isVerified: false,
     creatorAddress: null,
@@ -97,11 +97,11 @@ describe('mapIntelToObservations', () => {
     expect(flagObservations).not.toContain('Liquidity can be pulled at any time');  // LP_NOT_LOCKED — 7th, should be cut
   });
 
-  // 9. Caps scam indicator observations at 3
-  it('caps scam indicator observations at 3', () => {
+  // 9. Caps harm indicator observations at 3
+  it('caps harm indicator observations at 3', () => {
     const result = mapIntelToObservations(
       makeIntel({
-        scamIndicators: [
+        harmIndicators: [
           'HONEYPOT_RISK',
           'HIGH_TAX',
           'PROXY_CONTRACT',
@@ -109,7 +109,7 @@ describe('mapIntelToObservations', () => {
         ],
       }),
     );
-    // Only first 3 scam indicators should be mapped
+    // Only first 3 harm indicators should be mapped
     expect(result.observations).toContain('This token may trap your funds');
     expect(result.observations).toContain('Very high fees when buying/selling');
     expect(result.observations).toContain('Contract code can be changed by owner');
@@ -134,12 +134,12 @@ describe('mapIntelToObservations', () => {
     expect(result.observations[1]).toBe('Liquidity can be pulled at any time');
   });
 
-  // 12. Does not duplicate flags that appear in both riskFlags and scamIndicators
-  it('includes flags from both riskFlags and scamIndicators sections', () => {
+  // 12. Does not duplicate flags that appear in both riskFlags and harmIndicators
+  it('includes flags from both riskFlags and harmIndicators sections', () => {
     const result = mapIntelToObservations(
       makeIntel({
         riskFlags: ['HONEYPOT_RISK'],
-        scamIndicators: ['HIGH_TAX'],
+        harmIndicators: ['HIGH_TAX'],
       }),
     );
     // Both should appear
