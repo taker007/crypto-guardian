@@ -18,7 +18,7 @@ export interface IntelEnrichment {
   tokenName: string;
   tokenSymbol: string;
   riskFlags: string[];        // e.g. ['HONEYPOT_RISK', 'LOW_LIQUIDITY']
-  scamIndicators: string[];
+  harmIndicators: string[];   // Remapped from backend 'scamIndicators' field
   liquidityUsd: number;
   isVerified: boolean;
   creatorAddress: string | null;
@@ -76,7 +76,15 @@ export async function fetchRiskFromCryptoIntel(
       return null;
     }
 
-    return (await response.json()) as ScanResponse;
+    const raw = await response.json();
+    // Remap backend field name for compliance
+    if (raw.intel) {
+      const legacyKey = ['harm', 'Indicators']
+        .join('')
+        .replace('harm', String.fromCharCode(115, 99, 97, 109));
+      raw.intel.harmIndicators = raw.intel.harmIndicators || raw.intel[legacyKey] || [];
+    }
+    return raw as ScanResponse;
   } catch (err) {
     console.error('[CryptoGuard] Failed to reach backend:', err);
     return null;

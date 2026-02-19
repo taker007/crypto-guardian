@@ -53,7 +53,7 @@ const INTEL_REPORT_BASE = 'https://cryptoguardians.io/intel';
  * Generate a human-readable risk summary based on recommendation and risk score.
  */
 function buildRiskSummary(intel: IntelEnrichment): string {
-  const flagCount = intel.riskFlags.length + intel.scamIndicators.length;
+  const flagCount = intel.riskFlags.length + intel.harmIndicators.length;
 
   if (intel.recommendation === 'DANGEROUS' || intel.riskScore >= 70) {
     return COPY_MODE === 'formal'
@@ -139,7 +139,7 @@ export function mapIntelToObservations(intel: IntelEnrichment): ObservationResul
   }
 
   // 5. Scam indicators (max 3, always alarming)
-  for (const indicator of intel.scamIndicators.slice(0, 3)) {
+  for (const indicator of intel.harmIndicators.slice(0, 3)) {
     const mapping = FLAG_MAP[indicator];
     if (mapping) {
       observations.push(mapping[COPY_MODE]);

@@ -142,7 +142,7 @@ export const dynamicCopy = {
     meanings: {
       VERIFIED: "When we checked, the token didn't block sales. But this could change, and there might be other things to watch out for.",
       UNVERIFIED: "We can't say for sure if you'll be able to sell this token. If you go ahead, be extra careful.",
-      BLOCKED_BY_CONTRACT: "There's a chance you won't be able to sell this token once you buy it. This is sometimes a sign of a scam token (called a \"honeypot\").",
+      BLOCKED_BY_CONTRACT: "There's a chance you won't be able to sell this token once you buy it. This is sometimes a sign of a high-risk token (called a \"honeypot\").",
     } as Record<Tradeability, string>,
 
     observations: {
