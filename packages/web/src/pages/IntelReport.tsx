@@ -9,7 +9,7 @@
 // This is a standalone page that fetches from the Intel Report API.
 // =============================================================================
 
-const API_BASE = 'http://localhost:4008'; // Registered in ~/.port-registry for crypto-guardian/api
+const API_BASE = import.meta.env.VITE_API_BASE || '/api'; // Relative path in production, override via env for dev
 
 interface IntelReport {
   contractAddress: string;

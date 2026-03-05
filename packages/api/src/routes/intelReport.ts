@@ -12,7 +12,7 @@ import { Router, Request, Response } from 'express';
 const router = Router();
 
 // Crypto Intel backend URL
-const INTEL_BACKEND_URL = process.env.INTEL_BACKEND_URL || 'http://127.0.0.1:4004'; // Registered in ~/.port-registry for crypto-intel
+const INTEL_BACKEND_URL = process.env.INTEL_BACKEND_URL || 'https://api.cryptoguardians.com'; // Production cloud API
 
 /**
  * GET /api/intel/report

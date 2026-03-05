@@ -4,9 +4,9 @@
 
 **Name:** Crypto Guardian
 **Type:** MetaMask SNAP
-**Version:** 1.0.0
+**Version:** 1.1.1
 **Scope:** Ethereum Mainnet only (v1)
-**Backend:** Crypto Intel at `http://127.0.0.1:4006` (connected via `backend.ts`)
+**Backend:** Crypto Intel at `https://cryptoguardians.io` (connected via `backend.ts`)
 
 ## Project Structure
 
