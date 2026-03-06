@@ -1,26 +1,31 @@
 {
   "version": "1.1.1",
-  "description": "Crypto Guardian - Transaction security analysis for MetaMask",
+  "description": "Crypto Guardian provides risk signals for Ethereum tokens and transaction warnings. Advisory only — does not block transactions.",
   "proposedName": "Crypto Guardian",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cryptoguardian/snap.git"
+    "url": "https://github.com/taker007/crypto-guardian.git"
   },
   "source": {
-    "shasum": "YKsKmfM11m8t2uqdFPLpGQx1Wqmt62L2KFvdbkRJzvM=",
+    "shasum": "PLACEHOLDER_WILL_BE_UPDATED_BY_BUILD",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
-        "packageName": "@cryptoguardian/snap",
+        "iconPath": "assets/icon.svg",
+        "packageName": "@taker007/crypto-guardian-snap",
         "registry": "https://registry.npmjs.org/"
       }
     }
   },
   "initialPermissions": {
+    "snap_dialog": {},
+    "endowment:rpc": {
+      "dapps": true,
+      "snaps": false
+    },
     "endowment:transaction-insight": {},
-    "endowment:network-access": {},
-    "snap_dialog": {}
+    "endowment:network-access": {}
   },
-  "platformVersion": "4.4.2",
+  "platformVersion": "10.3.0",
   "manifestVersion": "0.1"
 }

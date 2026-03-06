@@ -12,7 +12,9 @@
     "declarationMap": true,
     "outDir": "dist",
     "rootDir": "src",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@metamask/snaps-sdk"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]

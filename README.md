@@ -1,75 +1,72 @@
-# CryptoGuardians MetaMask Snap
+# Crypto Guardian
 
-**Transaction Security Analysis for MetaMask**
+Crypto Guardian is a MetaMask SNAP that provides advisory risk signals for Ethereum tokens. It displays informational dialogs via `snap_dialog` to help users make informed decisions before interacting with a token.
 
-CryptoGuardians Snap intercepts Ethereum transactions before signing and displays a security analysis popup, helping users make informed decisions about their transactions.
-
-This Snap does not rely on any local or private network services.
-
-## Architecture
-
-```
-MetaMask Snap
-     |
-     v
-Crypto-Intel Cloud API (https://api.cryptoguardians.io)
-     |
-     v
-Multi-chain Threat Intelligence Engine
-```
-
-The Snap communicates exclusively with the CryptoGuardians cloud API over HTTPS. All risk analysis is performed server-side using a multi-source blockchain intelligence engine.
-
-## Features
-
-- **Transaction Interception**: Analyzes every transaction before you sign
-- **Risk Assessment**: Provides risk level (LOW/MEDIUM/HIGH) with numerical score
-- **Real-time Analysis**: Calls cloud security API for up-to-date risk assessment
-- **Security Alerts**: Clear popup with transaction details and warnings
-- **Offline Safe**: Shows explicit warning when security API is unreachable
-
-## How It Works
-
-When a transaction is initiated in MetaMask:
-
-1. MetaMask calls the Snap's `onTransaction` handler
-2. The Snap sends transaction metadata to the CryptoGuardians cloud API
-3. The API returns a risk assessment (risk level, score, findings)
-4. The Snap displays the results in a security alert popup
-5. User can **Continue** (sign) or **Cancel** (reject) the transaction
-
-If the API is unreachable (timeout, network error), the Snap displays an explicit fallback warning with risk level **UNKNOWN**, ensuring the user is never given a false sense of security.
-
-### Timeout and Retry Logic
-
-- **Hard timeout**: 1.5 seconds total
-- **Retry**: 1 automatic retry after 250ms delay
-- **Failure handling**: Network errors, non-2xx responses, invalid JSON, and timeouts all trigger the fallback warning
-
-## External Services
-
-CryptoGuardians Snap communicates with:
-
-**https://api.cryptoguardians.io**
-
-Purpose: Transaction risk analysis using multi-chain threat intelligence.
-
-Data transmitted:
-- Transaction metadata (recipient address, value, chain ID)
-- Contract addresses for security verification
-- Network identifier (chain ID)
-
-**No private keys or wallet secrets are transmitted.**
-
-The Snap only sends transaction metadata that is already visible to any transaction insight Snap via the `endowment:transaction-insight` permission.
+**Advisory only — does not block transactions.**
 
 ## Permissions
 
 | Permission | Purpose |
-|------------|---------|
+|-----------|---------|
+| `snap_dialog` | Display informational dialogs to the user |
+| `endowment:rpc` (dapps: true) | Receive JSON-RPC calls from dApps |
 | `endowment:transaction-insight` | Access transaction data before signing |
 | `endowment:network-access` | Call external security API |
-| `snap_dialog` | Display security alert popup |
+
+No private key access. No transaction signing. No account management.
+
+## External Services
+
+Crypto Guardian communicates with:
+
+**https://cryptoguardians.io/api**
+
+Purpose: Token risk analysis and transaction simulation using multi-chain threat intelligence.
+
+Data transmitted:
+- Token addresses for security verification
+- Transaction metadata (from, to, data, value, chainId) for simulation
+- Network identifier (chain ID)
+
+**No private keys or wallet secrets are transmitted.**
+
+## Installation
+
+Install the SNAP directly in MetaMask Flask from the published manifest URL. No external website or test interface is required.
+
+The SNAP does not rely on any external website or test interface for installation or review.
+
+## RPC Methods
+
+| Method | Description |
+|--------|-------------|
+| `analyzeToken` | Scans a token address and displays a risk summary dialog |
+| `showWarning` | Displays a pre-built risk warning dialog |
+| `showAnalysis` | Displays a detailed analysis dialog |
+| `showAcknowledgement` | Displays an advisory acknowledgement dialog |
+| `simulateTransaction` | Simulates a transaction and displays risk assessment |
+
+All dialogs use the `confirmation` type and are dismissible by the user.
+
+## How It Works
+
+### Transaction Insight (`onTransaction`)
+
+When a transaction is initiated in MetaMask:
+
+1. MetaMask calls the Snap's `onTransaction` handler
+2. The Snap simulates the transaction via the CryptoGuardians API
+3. The API returns a risk assessment (severity, confidence, details)
+4. The Snap displays the results in a transaction insight panel
+5. User can **Continue** (sign) or **Cancel** (reject) the transaction
+
+### Token Analysis (`onRpcRequest`)
+
+DApps can invoke Crypto Guardian via JSON-RPC to:
+
+1. Analyze a token address for risk indicators
+2. Display warning/analysis/acknowledgement dialogs
+3. Simulate transactions with risk assessment
 
 ## Building
 
@@ -89,8 +86,8 @@ npm run lint
 
 ### Prerequisites
 
-- Node.js 18+
-- npm
+- Node.js 18.6+
+- npm or yarn
 
 ## Project Structure
 
@@ -102,7 +99,7 @@ crypto-guardian/
 │       │   └── index.ts            # Main Snap entry point
 │       ├── test/
 │       │   └── index.test.ts       # Snap tests
-│       ├── images/
+│       ├── assets/
 │       │   └── icon.svg            # Snap icon
 │       ├── snap.manifest.json      # Snap permissions and metadata
 │       ├── snap.config.ts          # Build configuration
@@ -115,9 +112,13 @@ crypto-guardian/
 └── README.md
 ```
 
+## Testing
+
+Unit tests are included. Run `npm test` to execute them using [`@metamask/snaps-jest`](https://github.com/MetaMask/snaps/tree/main/packages/snaps-jest).
+
 ## License
 
-MIT License - See [LICENSE](LICENSE) for details.
+(MIT-0 OR Apache-2.0) — See [LICENSE](LICENSE) for details.
 
 ---
 

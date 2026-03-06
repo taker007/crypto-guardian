@@ -2,27 +2,27 @@
   "name": "crypto-guardian",
   "version": "1.1.1",
   "private": true,
-  "description": "Crypto Guardian - MetaMask Snap for transaction security analysis",
+  "description": "Crypto Guardian - MetaMask Snap for token risk analysis and transaction warnings",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cryptoguardian/snap.git"
+    "url": "https://github.com/taker007/crypto-guardian.git"
   },
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run --workspace=@cryptoguardian/snap build",
-    "clean": "npm run --workspace=@cryptoguardian/snap clean",
-    "lint": "npm run --workspace=@cryptoguardian/snap lint",
-    "lint:fix": "npm run --workspace=@cryptoguardian/snap lint:fix",
-    "serve": "npm run --workspace=@cryptoguardian/snap serve",
-    "start": "npm run --workspace=@cryptoguardian/snap start",
-    "test": "npm run --workspace=@cryptoguardian/snap test"
+    "build": "npm run --workspace=@taker007/crypto-guardian-snap build",
+    "clean": "npm run --workspace=@taker007/crypto-guardian-snap clean",
+    "lint": "npm run --workspace=@taker007/crypto-guardian-snap lint",
+    "lint:fix": "npm run --workspace=@taker007/crypto-guardian-snap lint:fix",
+    "serve": "npm run --workspace=@taker007/crypto-guardian-snap serve",
+    "start": "npm run --workspace=@taker007/crypto-guardian-snap start",
+    "test": "npm run --workspace=@taker007/crypto-guardian-snap test"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "~5.7.3"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.6.0"
   }
 }
