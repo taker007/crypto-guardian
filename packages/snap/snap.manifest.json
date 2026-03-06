@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "1.1.1",
   "description": "Crypto Guardian - Transaction security analysis for MetaMask",
   "proposedName": "Crypto Guardian",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/cryptoguardian/snap.git"
   },
   "source": {
-    "shasum": "bRTGynAOgPWeZbiQ4Pxmk+XoxMyTRVfQHpGmC+yQUgE=",
+    "shasum": "YKsKmfM11m8t2uqdFPLpGQx1Wqmt62L2KFvdbkRJzvM=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

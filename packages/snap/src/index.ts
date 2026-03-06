@@ -7,7 +7,7 @@ import { panel, heading, text, divider } from '@metamask/snaps-sdk';
  */
 
 // API Configuration
-const API_BASE_URL = 'http://localhost:4004';
+const API_BASE_URL = 'https://api.cryptoguardians.io';
 const API_TIMEOUT_MS = 1500; // 1.5 second hard timeout
 const RETRY_DELAY_MS = 250;  // Retry after 250ms if first attempt fails
 
