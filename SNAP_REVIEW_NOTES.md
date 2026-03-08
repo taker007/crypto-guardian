@@ -2,20 +2,18 @@
 
 ## Purpose
 
-Crypto Guardian is a MetaMask Snap that provides real-time risk signals for Ethereum token interactions and transactions. It analyzes tokens and contracts before users sign, helping them identify honeypots, rug pulls, and other high-risk patterns.
+Crypto Guardian is a MetaMask Snap that provides real-time risk signals for Ethereum token interactions. It analyzes tokens and contracts via a public intelligence API, helping users identify honeypots, rug pulls, and other high-risk patterns.
 
 The Snap is advisory only — it does not block, modify, or execute any transactions.
 
 ## Architecture
 
 ```
-User initiates transaction
+dApp calls analyzeToken RPC method
         |
-MetaMask triggers onTransaction handler
+Snap sends token address to POST /api/scan
         |
-Snap sends transaction data to public API
-        |
-API returns risk analysis (risk level, tradeability, signals)
+API returns risk analysis (risk level, tradeability, signals, intel)
         |
 Snap displays results via snap_dialog
         |
@@ -26,28 +24,25 @@ User decides whether to proceed
 
 | File | Purpose |
 |------|---------|
-| `src/index.tsx` | Snap entry point — onTransaction and onRpcRequest handlers |
+| `src/index.tsx` | Snap entry point — onRpcRequest handler |
 | `src/config.ts` | API URL configuration with runtime private-IP guard |
 | `src/backend.ts` | HTTPS fetch to `POST /api/scan` — the only backend bridge |
-| `src/simulationClient.ts` | Transaction simulation client (`POST /api/tx/simulate`) |
 | `src/intelMapper.ts` | Maps API response data to display format |
-| `src/warningDialog.tsx` | JSX UI panels for risk display |
 | `src/copy.ts` | User-facing copy strings (formal/plain modes) |
 | `src/types.ts` | TypeScript type definitions |
 
 ## Public API Usage
 
-All network requests are made to a single public domain:
+All network requests are made to a single public endpoint:
 
 - **Base URL**: `https://cryptoguardians.io`
 - **Token scan**: `POST /api/scan` — sends `{ token, chainId }`, returns risk analysis
-- **Transaction simulation**: `POST /api/tx/simulate` — sends `{ chainId, from, to, data, value }`, returns severity and recommendation
 
-No local services, private IPs, or development endpoints are used.
+No other endpoints are called. No local services, private IPs, or development endpoints are used.
 
 ### CORS Compatibility
 
-Both API endpoints return `Access-Control-Allow-Origin: *`, which is compatible with the Snap's `Origin: null` fetch behavior within the SES sandbox.
+The `/api/scan` endpoint returns `Access-Control-Allow-Origin: *`, which is compatible with the Snap's `Origin: null` fetch behavior within the SES sandbox. Verified via preflight (OPTIONS) and POST with `Origin: null`.
 
 ### Runtime Private-IP Guard
 
@@ -60,7 +55,6 @@ The string `localhost` appears once in the built bundle — within this defensiv
 | Method | Purpose |
 |--------|---------|
 | `analyzeToken` | Analyze a token address via the backend and display risk dialog |
-| `simulateTransaction` | Simulate a transaction and display warning dialog |
 | `getCopyMode` | Returns current copy mode ('formal' or 'plain') |
 
 ## Permissions
@@ -68,8 +62,7 @@ The string `localhost` appears once in the built bundle — within this defensiv
 | Permission | Purpose |
 |---|---|
 | `snap_dialog` | Display risk analysis results to the user |
-| `endowment:rpc` | Handle RPC requests from dapps (analyzeToken, simulateTransaction) |
-| `endowment:transaction-insight` | Intercept transactions before signing for risk analysis |
+| `endowment:rpc` | Handle RPC requests from dapps (analyzeToken, getCopyMode) |
 | `endowment:network-access` | Make HTTPS requests to the public CryptoGuardians API |
 
 No additional permissions are requested. The Snap does not access wallet keys, sign transactions, or store any user data.
@@ -82,7 +75,16 @@ No additional permissions are requested. The Snap does not access wallet keys, s
 - **No TODO/FIXME/HACK**: Zero review-risk comments
 - **No obfuscated code**: All field names and strings are plain-text
 - **Graceful degradation**: All API calls return null on failure; never throws unhandled
-- **2-second timeout**: Transaction simulation enforces strict timeout to avoid stalling MetaMask UX
+- **Single endpoint**: Only `POST /api/scan` is called — verified live and returning data
+
+## URLs in Built Bundle
+
+| URL | Purpose |
+|-----|---------|
+| `https://cryptoguardians.io` | Production API base URL |
+| `https://cryptoguardians.io/intel/{address}?chain={chain}` | Intel report link (displayed to user, not fetched) |
+
+No other URLs are present. No undeployed or dead endpoints.
 
 ## Non-Custodial Guarantee
 

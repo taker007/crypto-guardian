@@ -27,4 +27,3 @@ function validateApiUrl(url: string): string {
 
 export const API_BASE_URL = validateApiUrl(PRODUCTION_API);
 export const SCAN_API_URL = `${API_BASE_URL}/api/scan`;
-export const TX_SIM_API_URL = `${API_BASE_URL}/api/tx/simulate`;
