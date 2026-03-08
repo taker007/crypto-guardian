@@ -7,7 +7,6 @@ import { fetchRiskFromCryptoIntel } from './backend';
 import type { ScanResponse } from './backend';
 import { mapIntelToObservations, buildIntelReportUrl } from './intelMapper';
 import { simulateTransaction } from './simulationClient';
-import type { CompliantMessage } from './simulationClient';
 import { renderTxWarning, renderFallbackWarning } from './warningDialog';
 
 // =============================================================================
@@ -195,219 +194,17 @@ function renderFreeTierWarning(analysis: TokenAnalysis) {
 }
 
 /**
- * Render the Paid Tier analysis screen
- * Shows: All free tier info plus detailed explanations
- */
-function renderPaidTierAnalysis(analysis: TokenAnalysis) {
-  const c = getCopy();
-
-  return (
-    <Box>
-      <Heading>{c.warningHeadline}</Heading>
-      <Divider />
-
-      <Row label={c.labelRiskLevel}>
-        <Text><Bold>{getRiskLevelLabel(analysis.riskLevel)}</Bold></Text>
-      </Row>
-
-      <Row label={c.labelTradeability}>
-        <Text><Bold>{getTradeabilityLabel(analysis.tradeability)}</Bold></Text>
-      </Row>
-
-      {analysis.confidencePercent !== undefined && (
-        <Row label={c.labelConfidence}>
-          <Text><Bold>{analysis.confidencePercent}%</Bold></Text>
-        </Row>
-      )}
-
-      {analysis.sourcesUsed !== undefined && (
-        <Row label={c.labelSources}>
-          <Text><Bold>{analysis.sourcesUsed} checked</Bold></Text>
-        </Row>
-      )}
-
-      {analysis.riskSummary && (
-        <Box>
-          <Divider />
-          <Text><Bold>{c.sectionRiskSummary}</Bold></Text>
-          <Text>{analysis.riskSummary}</Text>
-        </Box>
-      )}
-
-      {analysis.confidenceExplanation && (
-        <Text>{analysis.confidenceExplanation}</Text>
-      )}
-
-      {analysis.sourceNames && analysis.sourceNames.length > 0 && (
-        <Text>{c.labelSourcesUsed}: {analysis.sourceNames.join(', ')}</Text>
-      )}
-
-      <Divider />
-
-      {analysis.reason && (
-        <Box>
-          <Text><Bold>{c.sectionWhyFlagged}</Bold></Text>
-          <Text>{analysis.reason}</Text>
-        </Box>
-      )}
-
-      {analysis.meaning && (
-        <Box>
-          <Text><Bold>{c.sectionWhatMeans}</Bold></Text>
-          <Text>{analysis.meaning}</Text>
-        </Box>
-      )}
-
-      {analysis.observations && analysis.observations.length > 0 && (
-        <Box>
-          <Text><Bold>{c.sectionObservations}</Bold></Text>
-          {analysis.observations.map((obs, _index) => (
-            <Text key={`obs-${obs.substring(0, 10)}`}>• {obs}</Text>
-          ))}
-        </Box>
-      )}
-
-      {analysis.intelObservations && analysis.intelObservations.length > 0 && (
-        <Box>
-          <Text><Bold>{c.sectionIntelObservations}</Bold></Text>
-          {analysis.intelObservations.map((obs, _index) => (
-            <Text key={`intel-${obs.substring(0, 10)}`}>• {obs}</Text>
-          ))}
-        </Box>
-      )}
-
-      <Divider />
-
-      {analysis.intelReportUrl && (
-        <Text>
-          <Link href={analysis.intelReportUrl}>{c.linkIntelReport}</Link>
-        </Text>
-      )}
-
-      <Text>{c.proPrompt}</Text>
-
-      <Text>
-        {c.disclaimerAnalysis}
-      </Text>
-
-      <Divider />
-
-      <Text>
-        {c.footer}
-      </Text>
-    </Box>
-  );
-}
-
-/**
- * Render the Risk Acknowledgement screen
- * Shown only for HIGH or CRITICAL risk when user clicks "Proceed anyway"
- */
-function renderRiskAcknowledgement() {
-  const c = getCopy();
-
-  return (
-    <Box>
-      <Heading>{c.acknowledgementHeadline}</Heading>
-      <Divider />
-
-      <Text>
-        {c.acknowledgementBody1}
-      </Text>
-
-      <Text>
-        {c.acknowledgementBody2}
-      </Text>
-
-      <Divider />
-
-      <Text>
-        {c.footer}
-      </Text>
-    </Box>
-  );
-}
-
-/**
- * Get mock analysis data for UI testing
- * Uses copy system for reason/meaning/observations text
- * TODO: Replace with actual Crypto Intel backend call in future version
- */
-function getMockAnalysis(tradeability: Tradeability): TokenAnalysis {
-  const dynamicCopy = getDynamicCopy();
-
-  const riskLevels: Record<Tradeability, RiskLevel> = {
-    'VERIFIED': 'LOW',
-    'UNVERIFIED': 'HIGH',
-    'BLOCKED_BY_CONTRACT': 'CRITICAL',
-  };
-
-  return {
-    riskLevel: riskLevels[tradeability],
-    tradeability,
-    reason: dynamicCopy.reasons[tradeability],
-    meaning: dynamicCopy.meanings[tradeability],
-    observations: dynamicCopy.observations[tradeability],
-  };
-}
-
-/**
  * Handle incoming JSON-RPC requests from dApps
  *
  * Available methods:
- * - showWarning: Display free tier warning screen
- * - showAnalysis: Display paid tier analysis screen
- * - showAcknowledgement: Display risk acknowledgement screen
  * - analyzeToken: Analyze a token via Crypto Intel backend
  * - simulateTransaction: Manually simulate a transaction and show warning dialog
  * - getCopyMode: Returns current copy mode ('formal' or 'plain')
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({
-  origin,
   request,
 }) => {
   switch (request.method) {
-
-    // Show free tier warning screen (for testing)
-    case 'showWarning': {
-      const params = request.params as { tradeability?: Tradeability } | undefined;
-      const tradeability = params?.tradeability || 'BLOCKED_BY_CONTRACT';
-      const analysis = getMockAnalysis(tradeability);
-
-      return snap.request({
-        method: 'snap_dialog',
-        params: {
-          type: 'confirmation',
-          content: renderFreeTierWarning(analysis),
-        },
-      });
-    }
-
-    // Show paid tier analysis screen (for testing)
-    case 'showAnalysis': {
-      const params = request.params as { tradeability?: Tradeability } | undefined;
-      const tradeability = params?.tradeability || 'BLOCKED_BY_CONTRACT';
-      const analysis = getMockAnalysis(tradeability);
-
-      return snap.request({
-        method: 'snap_dialog',
-        params: {
-          type: 'confirmation',
-          content: renderPaidTierAnalysis(analysis),
-        },
-      });
-    }
-
-    // Show risk acknowledgement screen (for testing)
-    case 'showAcknowledgement': {
-      return snap.request({
-        method: 'snap_dialog',
-        params: {
-          type: 'confirmation',
-          content: renderRiskAcknowledgement(),
-        },
-      });
-    }
 
     // Analyze a token address via Crypto Intel backend
     case 'analyzeToken': {

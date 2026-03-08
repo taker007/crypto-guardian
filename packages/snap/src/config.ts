@@ -17,11 +17,9 @@ const PRODUCTION_API = 'https://cryptoguardians.io';
 function validateApiUrl(url: string): string {
   const forbidden = /localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.\d|172\.(1[6-9]|2\d|3[01])\./i;
   if (forbidden.test(url)) {
-    console.error('[CryptoGuard] Blocked non-production API URL');
     return PRODUCTION_API;
   }
   if (!url.startsWith('https://')) {
-    console.error('[CryptoGuard] Blocked non-HTTPS API URL');
     return PRODUCTION_API;
   }
   return url;

@@ -34,19 +34,6 @@ const FLAG_MAP: Record<string, { formal: string; plain: string }> = {
   'TOKEN_2022':              { formal: 'Token uses Token-2022 program extensions',        plain: 'Token uses newer program with extra features' },
 };
 
-// Source name mapping for display
-const SOURCE_NAMES: Record<string, string> = {
-  goplus: 'GoPlus',
-  dexscreener: 'DexScreener',
-  blockExplorer: 'BlockExplorer',
-  coingecko: 'CoinGecko',
-  helius: 'Helius',
-  solscan: 'Solscan',
-  debank: 'Debank',
-  birdeye: 'Birdeye',
-  rugcheck: 'RugCheck',
-};
-
 const INTEL_REPORT_BASE = 'https://cryptoguardians.io/intel';
 
 /**
@@ -154,11 +141,3 @@ export function mapIntelToObservations(intel: IntelEnrichment): ObservationResul
   };
 }
 
-/**
- * Get the display names for sources used in analysis.
- */
-export function getSourceNames(sourceKeys: string[]): string[] {
-  return sourceKeys
-    .map((key) => SOURCE_NAMES[key] || key)
-    .filter(Boolean);
-}

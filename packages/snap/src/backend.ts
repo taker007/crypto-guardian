@@ -70,23 +70,17 @@ export async function fetchRiskFromCryptoIntel(
     });
 
     if (!response.ok) {
-      console.error(
-        `[CryptoGuard] Backend returned ${response.status}: ${response.statusText}`,
-      );
       return null;
     }
 
     const raw = await response.json();
-    // Remap backend field name for compliance
+    // Remap legacy backend field name 'scamIndicators' → 'harmIndicators'
     if (raw.intel) {
-      const legacyKey = ['harm', 'Indicators']
-        .join('')
-        .replace('harm', String.fromCharCode(115, 99, 97, 109));
+      const legacyKey = 'scamIndicators';
       raw.intel.harmIndicators = raw.intel.harmIndicators || raw.intel[legacyKey] || [];
     }
     return raw as ScanResponse;
-  } catch (err) {
-    console.error('[CryptoGuard] Failed to reach backend:', err);
+  } catch {
     return null;
   }
 }
