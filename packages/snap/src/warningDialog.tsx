@@ -1,5 +1,5 @@
 // =============================================================================
-// CRYPTO GUARDIAN - TRANSACTION INSIGHT DIALOG (v1.1.2)
+// CRYPTO GUARDIANS - TRANSACTION INSIGHT DIALOG (v1.1.2)
 // =============================================================================
 // Renders transaction analysis using MetaMask Snaps JSX components.
 //
@@ -11,7 +11,7 @@
 // - Deep link always shown when available
 // =============================================================================
 
-import { Box, Text, Bold, Divider, Heading, Row, Link } from '@metamask/snaps-sdk/jsx';
+import { Box, Text, Bold, Divider, Heading, Link } from '@metamask/snaps-sdk/jsx';
 import type { CompliantMessage } from './simulationClient';
 
 /**
@@ -22,10 +22,18 @@ import type { CompliantMessage } from './simulationClient';
 function extractTokenLine(details: string[]): string | null {
   const tokenDetail = details.find((d) => d.startsWith('Token:') || d.startsWith('Token Involved:'));
   if (!tokenDetail) return null;
-  // Strip any trailing context after the symbol parentheses
   const match = tokenDetail.match(/^Token(?:\s+Involved)?:\s*(.+?\([A-Z0-9]+\))/);
   if (match) return `Token Involved: ${match[1]}`;
   return null;
+}
+
+/**
+ * Normalize detail bullets: replace "contract" references with "token" for clarity.
+ */
+function normalizeDetail(detail: string): string {
+  return detail
+    .replace(/\bThe contract\b/gi, 'This token')
+    .replace(/\bthe contract\b/gi, 'this token');
 }
 
 /**
@@ -35,7 +43,7 @@ function extractTokenLine(details: string[]): string | null {
  *   Title → Body → Token → Detail → Recommendation → Deep link → Footer
  *
  * HIGH RISK (MEDIUM/HIGH):
- *   Title → Risk Level → Body → Token → Details → Recommendation → Deep link → Footer
+ *   Title → High Risk label → Body → Token → Details → Recommendation → Deep link → Footer
  */
 export function renderTxWarning(message: CompliantMessage, reportUrl: string | null) {
   const isLowRisk = message.severity === 'INFO' || message.severity === 'LOW';
@@ -72,7 +80,7 @@ export function renderTxWarning(message: CompliantMessage, reportUrl: string | n
         <Divider />
 
         <Text>
-          CryptoGuardian provides risk signals to help inform your decisions.
+          CryptoGuardians provides risk signals to help inform your decisions.
           You are always in control of your wallet.
         </Text>
       </Box>
@@ -85,9 +93,7 @@ export function renderTxWarning(message: CompliantMessage, reportUrl: string | n
       <Heading>{message.title}</Heading>
       <Divider />
 
-      <Row label="Risk Level">
-        <Text><Bold>{message.severity === 'HIGH' ? '\u{1F534} High' : '\u{1F7E1} Elevated'}</Bold></Text>
-      </Row>
+      <Text><Bold>{'\u{1F534}'} High Risk</Bold></Text>
 
       <Text>This transaction involves a token that may restrict selling or movement of funds.</Text>
 
@@ -100,7 +106,7 @@ export function renderTxWarning(message: CompliantMessage, reportUrl: string | n
         .filter((d) => !d.startsWith('Token:') && !d.startsWith('Token Involved:'))
         .slice(0, 2)
         .map((detail) => (
-          <Text key={`d-${detail.substring(0, 12)}`}>{'\u2022'} {detail}</Text>
+          <Text key={`d-${detail.substring(0, 12)}`}>{'\u2022'} {normalizeDetail(detail)}</Text>
         ))}
 
       <Divider />
@@ -119,7 +125,7 @@ export function renderTxWarning(message: CompliantMessage, reportUrl: string | n
       <Divider />
 
       <Text>
-        CryptoGuardian provides risk signals to help inform your decisions.
+        CryptoGuardians provides risk signals to help inform your decisions.
         You are always in control of your wallet.
       </Text>
     </Box>
@@ -135,21 +141,19 @@ export function renderFallbackWarning() {
       <Heading>Transaction Review</Heading>
       <Divider />
 
-      <Row label="Status">
-        <Text><Bold>Analysis unavailable</Bold></Text>
-      </Row>
+      <Text><Bold>Analysis unavailable</Bold></Text>
 
       <Divider />
 
       <Text>
-        CryptoGuardian could not analyze this transaction at this time.
+        CryptoGuardians could not analyze this transaction at this time.
         This does not indicate a problem with the transaction.
       </Text>
 
       <Divider />
 
       <Text>
-        CryptoGuardian provides risk signals to help inform your decisions.
+        CryptoGuardians provides risk signals to help inform your decisions.
         You are always in control of your wallet.
       </Text>
     </Box>
