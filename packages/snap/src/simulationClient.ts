@@ -29,6 +29,13 @@ interface SimulationResponse {
   verdict: string;
   confidence: number;
   message: CompliantMessage;
+  report?: { url: string; label: string };
+}
+
+/** Result returned to the Snap handler */
+export interface SimulationResult {
+  message: CompliantMessage;
+  reportUrl: string | null;
 }
 
 /** Transaction parameters accepted by the simulation client */
@@ -56,7 +63,7 @@ const TIMEOUT_MS = 2000;
  */
 export async function simulateTransaction(
   tx: SimulationTxParams,
-): Promise<CompliantMessage | null> {
+): Promise<SimulationResult | null> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -86,7 +93,10 @@ export async function simulateTransaction(
       return null;
     }
 
-    return result.message;
+    return {
+      message: result.message,
+      reportUrl: result.report?.url ?? null,
+    };
   } catch {
     // Network error, timeout, JSON parse error — all handled gracefully
     return null;

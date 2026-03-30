@@ -443,7 +443,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error('Both "from" and "to" addresses are required');
       }
 
-      const message = await simulateTransaction({
+      const simResult = await simulateTransaction({
         from: params.from,
         to: params.to,
         data: params.data,
@@ -451,8 +451,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         chainId: params.chainId,
       });
 
-      const content = message
-        ? renderTxWarning(message)
+      const content = simResult
+        ? renderTxWarning(simResult.message, simResult.reportUrl)
         : renderFallbackWarning();
 
       return snap.request({
@@ -517,7 +517,7 @@ export const onTransaction: OnTransactionHandler = async ({
   }
 
   // Call simulation backend (2s timeout, never throws)
-  const message = await simulateTransaction({
+  const result = await simulateTransaction({
     chainId: chain,
     from,
     to,
@@ -526,22 +526,24 @@ export const onTransaction: OnTransactionHandler = async ({
   });
 
   // Backend unavailable — show fallback
-  if (!message) {
+  if (!result) {
     return {
       content: renderFallbackWarning(),
     };
   }
 
+  const { message, reportUrl } = result;
+
   // HIGH severity — use MetaMask's critical warning overlay
   if (message.severity === 'HIGH') {
     return {
-      content: renderTxWarning(message),
+      content: renderTxWarning(message, reportUrl),
       severity: 'critical',
     };
   }
 
   // MEDIUM, LOW, INFO — show insights panel (no blocking overlay)
   return {
-    content: renderTxWarning(message),
+    content: renderTxWarning(message, reportUrl),
   };
 };
