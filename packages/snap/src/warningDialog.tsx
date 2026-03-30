@@ -1,11 +1,10 @@
 // =============================================================================
-// CRYPTO GUARDIAN - TRANSACTION INSIGHT DIALOG
+// CRYPTO GUARDIAN - TRANSACTION INSIGHT DIALOG (v1.1.2)
 // =============================================================================
 // Renders transaction analysis using MetaMask Snaps JSX components.
-// All displayed text comes from the backend's compliant warning engine.
 //
 // UX RULES:
-// - No confidence percentages
+// - No confidence percentages — never displayed
 // - No severity labels for low-risk transactions
 // - No "safe", "guaranteed", "risk-free"
 // - Plain English only
@@ -16,58 +15,98 @@ import { Box, Text, Bold, Divider, Heading, Row, Link } from '@metamask/snaps-sd
 import type { CompliantMessage } from './simulationClient';
 
 /**
+ * Extract token identity from the details array.
+ * Backend sends details like: "Token: USD Coin (USDC) — no known token risk detected"
+ * Returns formatted "Token Involved: USD Coin (USDC)" or null.
+ */
+function extractTokenLine(details: string[]): string | null {
+  const tokenDetail = details.find((d) => d.startsWith('Token:') || d.startsWith('Token Involved:'));
+  if (!tokenDetail) return null;
+  // Strip any trailing context after the symbol parentheses
+  const match = tokenDetail.match(/^Token(?:\s+Involved)?:\s*(.+?\([A-Z0-9]+\))/);
+  if (match) return `Token Involved: ${match[1]}`;
+  return null;
+}
+
+/**
  * Render the transaction insight content.
  *
- * Layout varies by severity:
- *
  * LOW RISK (INFO/LOW):
- *   Title → Token context → Details → Recommendation → Deep link → Footer
+ *   Title → Body → Token → Detail → Recommendation → Deep link → Footer
  *
  * HIGH RISK (MEDIUM/HIGH):
- *   Title → Severity → Token context → Details → Recommendation → Deep link → Footer
+ *   Title → Risk Level → Body → Token → Details → Recommendation → Deep link → Footer
  */
 export function renderTxWarning(message: CompliantMessage, reportUrl: string | null) {
   const isLowRisk = message.severity === 'INFO' || message.severity === 'LOW';
+  const tokenLine = extractTokenLine(message.details);
 
-  // Use "No Significant Risk Detected" for low-risk to avoid any confusion
-  const displayTitle = isLowRisk
-    ? 'No Significant Risk Detected'
-    : message.title;
+  if (isLowRisk) {
+    return (
+      <Box>
+        <Heading>No Significant Risk Detected</Heading>
+        <Divider />
 
+        <Text>This transaction appears consistent with normal activity.</Text>
+
+        <Divider />
+
+        {tokenLine && (
+          <Text>{'\u2022'} {tokenLine}</Text>
+        )}
+        <Text>{'\u2022'} No indicators of restricted trading or hidden fees</Text>
+
+        <Divider />
+
+        <Text><Bold>Proceed if you recognize and trust this transaction.</Bold></Text>
+
+        {reportUrl && (
+          <>
+            <Divider />
+            <Link href={reportUrl}>
+              View Full Analysis \u2192
+            </Link>
+          </>
+        )}
+
+        <Divider />
+
+        <Text>
+          CryptoGuardian provides risk signals to help inform your decisions.
+          You are always in control of your wallet.
+        </Text>
+      </Box>
+    );
+  }
+
+  // HIGH / MEDIUM risk
   return (
     <Box>
-      <Heading>{displayTitle}</Heading>
+      <Heading>{message.title}</Heading>
       <Divider />
 
-      {/* Only show severity for elevated risk */}
-      {!isLowRisk && (
-        <Row label="Risk Level">
-          <Text><Bold>{message.severity === 'HIGH' ? '\u{1F534} High' : '\u{1F7E1} Elevated'}</Bold></Text>
-        </Row>
+      <Row label="Risk Level">
+        <Text><Bold>{message.severity === 'HIGH' ? '\u{1F534} High' : '\u{1F7E1} Elevated'}</Bold></Text>
+      </Row>
+
+      <Text>This transaction involves a token that may restrict selling or movement of funds.</Text>
+
+      <Divider />
+
+      {tokenLine && (
+        <Text>{'\u2022'} {tokenLine}</Text>
       )}
-
-      {/* Summary */}
-      <Text>{isLowRisk
-        ? 'This transaction appears consistent with normal activity.'
-        : message.summary}</Text>
-
-      <Divider />
-
-      {/* Detail bullets (max 2) */}
-      {message.details.map((detail) => (
-        <Text key={`d-${detail.substring(0, 12)}`}>{'\u2022'} {detail}</Text>
-      ))}
+      {message.details
+        .filter((d) => !d.startsWith('Token:') && !d.startsWith('Token Involved:'))
+        .slice(0, 2)
+        .map((detail) => (
+          <Text key={`d-${detail.substring(0, 12)}`}>{'\u2022'} {detail}</Text>
+        ))}
 
       <Divider />
 
-      {/* Recommendation */}
-      <Text><Bold>
-        {isLowRisk
-          ? 'Proceed if you recognize and trust this transaction.'
-          : message.recommendation}
-      </Bold></Text>
+      <Text><Bold>{message.recommendation}</Bold></Text>
 
-      {/* Deep link */}
       {reportUrl && (
         <>
           <Divider />
@@ -88,7 +127,7 @@ export function renderTxWarning(message: CompliantMessage, reportUrl: string | n
 }
 
 /**
- * Render the fallback warning when the backend is unavailable.
+ * Render the fallback when backend is unavailable.
  */
 export function renderFallbackWarning() {
   return (
