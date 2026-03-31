@@ -63,6 +63,57 @@ function mapSeverityToRiskLevel(severity: string): RiskLevel {
   }
 }
 
+/**
+ * Enforce riskLevel ↔ title/summary/recommendation alignment.
+ * riskLevel is the ONLY authority. Runs AFTER severity→riskLevel mapping.
+ * Catches any mismatch between riskLevel and the backend's text fields.
+ */
+const RISKLEVEL_ALIGNED: Record<RiskLevel, { title: string; summary: string; recommendation: string }> = {
+  HIGH: {
+    title: 'Transaction Risk Detected',
+    summary: 'This transaction involves a token that may restrict selling or movement of funds.',
+    recommendation: 'Review this transaction carefully before proceeding.',
+  },
+  MEDIUM: {
+    title: 'Elevated Risk Detected',
+    summary: 'This transaction shows some risk signals that should be reviewed.',
+    recommendation: 'Proceed with caution and ensure you trust this transaction.',
+  },
+  LOW: {
+    title: 'No Significant Risk Detected',
+    summary: 'This transaction appears consistent with normal activity and no risk signals were identified.',
+    recommendation: 'Proceed if you recognize and trust this transaction.',
+  },
+  UNKNOWN: {
+    title: 'Unable to Analyze Transaction',
+    summary: 'Unable to analyze this transaction at this time.',
+    recommendation: 'Proceed only if you recognize and trust this action.',
+  },
+};
+
+function enforceRiskLevelAlignment(msg: DisplayMessage): DisplayMessage {
+  const aligned = RISKLEVEL_ALIGNED[msg.riskLevel];
+  if (!aligned) return msg;
+
+  // Check if title contradicts riskLevel
+  const titleIsLow = /^no significant risk/i.test(msg.title);
+  const titleIsHigh = /^(transaction risk|elevated risk)/i.test(msg.title);
+  const isLow = msg.riskLevel === 'LOW';
+  const isHigh = msg.riskLevel === 'HIGH';
+
+  const mismatch =
+    (isLow && titleIsHigh) ||
+    (isHigh && titleIsLow) ||
+    (msg.riskLevel === 'MEDIUM' && (titleIsLow || titleIsHigh)) ||
+    (msg.riskLevel === 'UNKNOWN');
+
+  if (mismatch) {
+    return { ...msg, ...aligned };
+  }
+
+  return msg;
+}
+
 /** Transaction parameters accepted by the simulation client */
 export interface SimulationTxParams {
   chainId?: string;
@@ -117,15 +168,19 @@ export async function simulateTransaction(
     }
 
     const raw = result.message;
+    const riskLevel = mapSeverityToRiskLevel(raw.severity);
+
+    // Build display message then enforce riskLevel alignment
+    const display: DisplayMessage = {
+      riskLevel,
+      title: raw.title,
+      summary: raw.summary,
+      details: raw.details,
+      recommendation: raw.recommendation,
+    };
 
     return {
-      message: {
-        riskLevel: mapSeverityToRiskLevel(raw.severity),
-        title: raw.title,
-        summary: raw.summary,
-        details: raw.details,
-        recommendation: raw.recommendation,
-      },
+      message: enforceRiskLevelAlignment(display),
       reportUrl: result.report?.url ?? null,
     };
   } catch {
