@@ -35,12 +35,38 @@ function normalizeDetail(detail: string): string {
  * Uses array-based construction with panel() — zero JSX.
  */
 export function renderTxWarning(message: CompliantMessage, reportUrl: string | null) {
-  const isLowRisk = message.severity === 'INFO' || message.severity === 'LOW';
+  // Single source of truth: message.severity from the backend
+  const severity = message.severity;
+  const isHighRisk = severity === 'HIGH';
+  const isLowRisk = severity === 'INFO' || severity === 'LOW';
   const tokenLine = extractTokenLine(message.details);
 
   const content: Component[] = [];
 
-  if (isLowRisk) {
+  if (isHighRisk) {
+    // HIGH risk — show strong warning with red indicator
+    content.push(heading('Transaction Risk Detected'));
+    content.push(divider());
+    content.push(text('**🔴 High Risk**'));
+    content.push(text('This transaction involves a token that may restrict selling or movement of funds.'));
+    content.push(divider());
+
+    if (tokenLine) {
+      content.push(text(`• ${tokenLine}`));
+    }
+
+    const nonTokenDetails = message.details
+      .filter((d) => !d.startsWith('Token:') && !d.startsWith('Token Involved:'))
+      .slice(0, 2);
+
+    for (const detail of nonTokenDetails) {
+      content.push(text(`• ${normalizeDetail(detail)}`));
+    }
+
+    content.push(divider());
+    content.push(text(`**${message.recommendation}**`));
+  } else if (isLowRisk) {
+    // INFO/LOW — no risk indicators, clean summary
     content.push(heading('No Significant Risk Detected'));
     content.push(divider());
     content.push(text('This transaction appears consistent with normal activity.'));
@@ -54,11 +80,11 @@ export function renderTxWarning(message: CompliantMessage, reportUrl: string | n
     content.push(divider());
     content.push(text('**Proceed if you recognize and trust this transaction.**'));
   } else {
-    // HIGH / MEDIUM risk
+    // MEDIUM — elevated but not high, show title from backend without red indicator
     content.push(heading(message.title));
     content.push(divider());
-    content.push(text('**🔴 High Risk**'));
-    content.push(text('This transaction involves a token that may restrict selling or movement of funds.'));
+    content.push(text('**⚠ Elevated Risk**'));
+    content.push(text(message.summary));
     content.push(divider());
 
     if (tokenLine) {
