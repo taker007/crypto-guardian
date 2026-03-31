@@ -77,7 +77,7 @@ export function renderTxWarning(message: CompliantMessage, reportUrl: string | n
     content.push(text(`**${message.recommendation}**`));
   }
 
-  // Deep link (markdown link inside text)
+  // Deep link (Snap SDK text supports markdown links)
   if (reportUrl) {
     content.push(divider());
     content.push(text(`[View Full Analysis →](${reportUrl})`));
