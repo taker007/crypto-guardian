@@ -2,13 +2,13 @@
 // CRYPTO GUARDIANS - TRANSACTION INSIGHT DIALOG (v1.1.2)
 // =============================================================================
 // PURE DISPLAY LAYER — renders backend data exactly as received.
-// NO risk computation, NO inference, NO defaults, NO overrides.
-// Uses ONLY Snap SDK function-based UI: panel(), heading(), text(), divider()
+// Uses ONLY message.riskLevel as the single source of truth.
+// NO severity, NO score, NO confidence, NO derived risk variables.
 // =============================================================================
 
 import { panel, heading, text, divider } from '@metamask/snaps-sdk';
 import type { Component } from '@metamask/snaps-sdk';
-import type { CompliantMessage } from './simulationClient';
+import type { DisplayMessage } from './simulationClient';
 
 /**
  * Extract token identity from the details array.
@@ -32,14 +32,14 @@ function normalizeDetail(detail: string): string {
 
 /**
  * Render the transaction insight content.
- * Pure passthrough of backend CompliantMessage — UI makes zero risk decisions.
+ * All UI decisions driven solely by message.riskLevel.
  */
-export function renderTxWarning(message: CompliantMessage, reportUrl: string | null) {
-  const severity = message.severity;
+export function renderTxWarning(message: DisplayMessage, reportUrl: string | null) {
+  const riskLevel = message.riskLevel;
   const tokenLine = extractTokenLine(message.details);
 
-  // If backend didn't provide severity, show generic fallback
-  if (!severity) {
+  // Missing risk level → generic fallback (no risk claim)
+  if (!riskLevel || riskLevel === 'UNKNOWN') {
     return panel([
       heading('Unable to Analyze Transaction'),
       divider(),
@@ -57,19 +57,19 @@ export function renderTxWarning(message: CompliantMessage, reportUrl: string | n
   content.push(heading(message.title));
   content.push(divider());
 
-  // Risk indicator: only shown for HIGH, directly from backend severity
-  if (severity === 'HIGH') {
+  // Risk indicator: driven ONLY by riskLevel
+  if (riskLevel === 'HIGH') {
     content.push(text('**🔴 High Risk**'));
-  } else if (severity === 'MEDIUM') {
+  } else if (riskLevel === 'MEDIUM') {
     content.push(text('**⚠ Elevated**'));
   }
-  // INFO and LOW: no risk indicator shown
+  // LOW: no risk indicator
 
   // Summary: always from backend
   content.push(text(message.summary));
   content.push(divider());
 
-  // Token line + detail bullets: from backend details array
+  // Token line + detail bullets: from backend
   if (tokenLine) {
     content.push(text(`• ${tokenLine}`));
   }

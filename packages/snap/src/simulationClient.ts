@@ -10,11 +10,32 @@
 
 import { TX_SIM_API_URL } from './config';
 
+// ─── Canonical risk level — the ONLY field the UI may use for risk display ──
+
+export type RiskLevel = 'HIGH' | 'MEDIUM' | 'LOW' | 'UNKNOWN';
+
 /**
- * Compliant warning message returned by the simulation engine.
- * All text fields are pre-sanitized — no forbidden language will be present.
+ * Normalized message passed to the UI layer.
+ * riskLevel is the sole source of truth for risk display.
  */
-export interface CompliantMessage {
+export interface DisplayMessage {
+  riskLevel: RiskLevel;
+  title: string;
+  summary: string;
+  details: string[];
+  recommendation: string;
+}
+
+/** Result returned to the Snap handler */
+export interface SimulationResult {
+  message: DisplayMessage;
+  reportUrl: string | null;
+}
+
+// ─── Internal types — never exposed to UI ───────────────────────────────────
+
+/** Raw backend response shape (severity field) */
+interface RawCompliantMessage {
   severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH';
   title: string;
   summary: string;
@@ -23,19 +44,23 @@ export interface CompliantMessage {
   confidence: number;
 }
 
-/** Full simulation API response shape */
 interface SimulationResponse {
   ok: boolean;
   verdict: string;
   confidence: number;
-  message: CompliantMessage;
+  message: RawCompliantMessage;
   report?: { url: string; label: string };
 }
 
-/** Result returned to the Snap handler */
-export interface SimulationResult {
-  message: CompliantMessage;
-  reportUrl: string | null;
+/** Map backend severity to canonical riskLevel at the boundary */
+function mapSeverityToRiskLevel(severity: string): RiskLevel {
+  switch (severity) {
+    case 'HIGH': return 'HIGH';
+    case 'MEDIUM': return 'MEDIUM';
+    case 'LOW':
+    case 'INFO': return 'LOW';
+    default: return 'UNKNOWN';
+  }
 }
 
 /** Transaction parameters accepted by the simulation client */
@@ -51,14 +76,12 @@ const TIMEOUT_MS = 2000;
 
 /**
  * Send a transaction to the backend simulation engine and return
- * the compliant warning message.
+ * the normalized display message.
  *
- * Returns null if:
- * - Backend is unreachable
- * - Backend returns a non-OK response
- * - Request times out (>2s)
- * - Response is malformed
+ * Backend severity is mapped to riskLevel at this boundary.
+ * The UI layer never sees the raw severity field.
  *
+ * Returns null if backend is unreachable, errors, or times out.
  * This function NEVER throws.
  */
 export async function simulateTransaction(
@@ -93,12 +116,19 @@ export async function simulateTransaction(
       return null;
     }
 
+    const raw = result.message;
+
     return {
-      message: result.message,
+      message: {
+        riskLevel: mapSeverityToRiskLevel(raw.severity),
+        title: raw.title,
+        summary: raw.summary,
+        details: raw.details,
+        recommendation: raw.recommendation,
+      },
       reportUrl: result.report?.url ?? null,
     };
   } catch {
-    // Network error, timeout, JSON parse error — all handled gracefully
     return null;
   }
 }

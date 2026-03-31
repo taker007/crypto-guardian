@@ -7,7 +7,7 @@ import { fetchRiskFromCryptoIntel } from './backend';
 import type { ScanResponse } from './backend';
 import { mapIntelToObservations, buildIntelReportUrl } from './intelMapper';
 import { simulateTransaction } from './simulationClient';
-import type { CompliantMessage } from './simulationClient';
+import type { DisplayMessage } from './simulationClient';
 import { renderTxWarning, renderFallbackWarning } from './warningDialog';
 
 // =============================================================================
@@ -534,15 +534,15 @@ export const onTransaction: OnTransactionHandler = async ({
 
   const { message, reportUrl } = result;
 
-  // HIGH severity — use MetaMask's critical warning overlay
-  if (message.severity === 'HIGH') {
+  // HIGH riskLevel — use MetaMask's critical warning overlay
+  if (message.riskLevel === 'HIGH') {
     return {
       content: renderTxWarning(message, reportUrl),
       severity: 'critical',
     };
   }
 
-  // MEDIUM, LOW, INFO — show insights panel (no blocking overlay)
+  // MEDIUM, LOW, UNKNOWN — show insights panel (no blocking overlay)
   return {
     content: renderTxWarning(message, reportUrl),
   };
