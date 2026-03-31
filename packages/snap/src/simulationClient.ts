@@ -108,7 +108,14 @@ function enforceRiskLevelAlignment(msg: DisplayMessage): DisplayMessage {
     (msg.riskLevel === 'UNKNOWN');
 
   if (mismatch) {
-    return { ...msg, ...aligned };
+    // Override title/summary/recommendation but ALWAYS preserve details from backend
+    return {
+      ...msg,
+      title: aligned.title,
+      summary: aligned.summary,
+      recommendation: aligned.recommendation,
+      // details: msg.details — explicitly NOT overridden
+    };
   }
 
   return msg;
