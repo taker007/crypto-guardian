@@ -1,9 +1,9 @@
 // =============================================================================
 // CRYPTO GUARDIANS - TRANSACTION INSIGHT DIALOG (v1.1.2)
 // =============================================================================
+// PURE DISPLAY LAYER — renders backend data exactly as received.
+// NO risk computation, NO inference, NO defaults, NO overrides.
 // Uses ONLY Snap SDK function-based UI: panel(), heading(), text(), divider()
-// NO JSX, NO fragments, NO React-style rendering.
-// Bold via markdown (**text**), links via markdown [label](url).
 // =============================================================================
 
 import { panel, heading, text, divider } from '@metamask/snaps-sdk';
@@ -32,78 +32,62 @@ function normalizeDetail(detail: string): string {
 
 /**
  * Render the transaction insight content.
- * Uses array-based construction with panel() — zero JSX.
+ * Pure passthrough of backend CompliantMessage — UI makes zero risk decisions.
  */
 export function renderTxWarning(message: CompliantMessage, reportUrl: string | null) {
-  // Single source of truth: message.severity from the backend
   const severity = message.severity;
-  const isHighRisk = severity === 'HIGH';
-  const isLowRisk = severity === 'INFO' || severity === 'LOW';
   const tokenLine = extractTokenLine(message.details);
+
+  // If backend didn't provide severity, show generic fallback
+  if (!severity) {
+    return panel([
+      heading('Unable to Analyze Transaction'),
+      divider(),
+      text('Unable to analyze this transaction at this time.'),
+      divider(),
+      text('**Proceed only if you recognize and trust this action.**'),
+      divider(),
+      text('CryptoGuardians provides risk signals to help inform your decisions. You are always in control of your wallet.'),
+    ]);
+  }
 
   const content: Component[] = [];
 
-  if (isHighRisk) {
-    // HIGH risk — show strong warning with red indicator
-    content.push(heading('Transaction Risk Detected'));
-    content.push(divider());
+  // Title: always from backend
+  content.push(heading(message.title));
+  content.push(divider());
+
+  // Risk indicator: only shown for HIGH, directly from backend severity
+  if (severity === 'HIGH') {
     content.push(text('**🔴 High Risk**'));
-    content.push(text('This transaction involves a token that may restrict selling or movement of funds.'));
-    content.push(divider());
+  } else if (severity === 'MEDIUM') {
+    content.push(text('**⚠ Elevated**'));
+  }
+  // INFO and LOW: no risk indicator shown
 
-    if (tokenLine) {
-      content.push(text(`• ${tokenLine}`));
-    }
+  // Summary: always from backend
+  content.push(text(message.summary));
+  content.push(divider());
 
-    const nonTokenDetails = message.details
-      .filter((d) => !d.startsWith('Token:') && !d.startsWith('Token Involved:'))
-      .slice(0, 2);
-
-    for (const detail of nonTokenDetails) {
-      content.push(text(`• ${normalizeDetail(detail)}`));
-    }
-
-    content.push(divider());
-    content.push(text(`**${message.recommendation}**`));
-  } else if (isLowRisk) {
-    // INFO/LOW — no risk indicators, clean summary
-    content.push(heading('No Significant Risk Detected'));
-    content.push(divider());
-    content.push(text('This transaction appears consistent with normal activity.'));
-    content.push(divider());
-
-    if (tokenLine) {
-      content.push(text(`• ${tokenLine}`));
-    }
-    content.push(text('• No indicators of restricted trading or hidden fees'));
-
-    content.push(divider());
-    content.push(text('**Proceed if you recognize and trust this transaction.**'));
-  } else {
-    // MEDIUM — elevated but not high, show title from backend without red indicator
-    content.push(heading(message.title));
-    content.push(divider());
-    content.push(text('**⚠ Elevated Risk**'));
-    content.push(text(message.summary));
-    content.push(divider());
-
-    if (tokenLine) {
-      content.push(text(`• ${tokenLine}`));
-    }
-
-    const nonTokenDetails = message.details
-      .filter((d) => !d.startsWith('Token:') && !d.startsWith('Token Involved:'))
-      .slice(0, 2);
-
-    for (const detail of nonTokenDetails) {
-      content.push(text(`• ${normalizeDetail(detail)}`));
-    }
-
-    content.push(divider());
-    content.push(text(`**${message.recommendation}**`));
+  // Token line + detail bullets: from backend details array
+  if (tokenLine) {
+    content.push(text(`• ${tokenLine}`));
   }
 
-  // Deep link (Snap SDK text supports markdown links)
+  const nonTokenDetails = message.details
+    .filter((d) => !d.startsWith('Token:') && !d.startsWith('Token Involved:'))
+    .slice(0, 2);
+
+  for (const detail of nonTokenDetails) {
+    content.push(text(`• ${normalizeDetail(detail)}`));
+  }
+
+  content.push(divider());
+
+  // Recommendation: always from backend
+  content.push(text(`**${message.recommendation}**`));
+
+  // Deep link
   if (reportUrl) {
     content.push(divider());
     content.push(text(`[View Full Analysis →](${reportUrl})`));
@@ -125,6 +109,8 @@ export function renderFallbackWarning() {
     text('**Analysis unavailable**'),
     divider(),
     text('CryptoGuardians could not analyze this transaction at this time. This does not indicate a problem with the transaction.'),
+    divider(),
+    text('**Proceed only if you recognize and trust this action.**'),
     divider(),
     text('CryptoGuardians provides risk signals to help inform your decisions. You are always in control of your wallet.'),
   ]);
