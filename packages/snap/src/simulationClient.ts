@@ -71,23 +71,23 @@ function mapSeverityToRiskLevel(severity: string): RiskLevel {
 const RISKLEVEL_ALIGNED: Record<RiskLevel, { title: string; summary: string; recommendation: string }> = {
   HIGH: {
     title: 'Transaction Risk Detected',
-    summary: 'This transaction involves a token that may restrict selling or movement of funds.',
+    summary: 'This transaction shows warning signs that could put your funds at risk.',
     recommendation: 'Review this transaction carefully before proceeding.',
   },
   MEDIUM: {
-    title: 'Elevated Risk Detected',
-    summary: 'This transaction shows some risk signals that should be reviewed.',
-    recommendation: 'Proceed with caution and ensure you trust this transaction.',
+    title: 'Risk Signals Detected',
+    summary: 'We found some warning signs. This transaction may carry added risk.',
+    recommendation: 'Proceed carefully and verify the token before continuing.',
   },
   LOW: {
     title: 'No Significant Risk Detected',
-    summary: 'This transaction appears consistent with normal activity and no risk signals were identified.',
-    recommendation: 'Proceed if you recognize and trust this transaction.',
+    summary: 'We did not find major warning signs for this transaction.',
+    recommendation: 'Continue only if this transaction matches what you expect.',
   },
   UNKNOWN: {
-    title: 'Unable to Analyze Transaction',
-    summary: 'Unable to analyze this transaction at this time.',
-    recommendation: 'Proceed only if you recognize and trust this action.',
+    title: 'Limited Data Available',
+    summary: 'We could not gather enough reliable information to fully assess this transaction.',
+    recommendation: 'Use extra caution before proceeding.',
   },
 };
 

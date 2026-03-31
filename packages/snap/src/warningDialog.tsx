@@ -41,11 +41,11 @@ export function renderTxWarning(message: DisplayMessage, reportUrl: string | nul
   // Missing risk level → generic fallback (no risk claim)
   if (!riskLevel || riskLevel === 'UNKNOWN') {
     return panel([
-      heading('Unable to Analyze Transaction'),
+      heading('Limited Data Available'),
       divider(),
-      text('Unable to analyze this transaction at this time.'),
+      text('We could not gather enough reliable information to fully assess this transaction.'),
       divider(),
-      text('**Proceed only if you recognize and trust this action.**'),
+      text('**Use extra caution before proceeding.**'),
       divider(),
       text('CryptoGuardians provides risk signals to help inform your decisions. You are always in control of your wallet.'),
     ]);
@@ -104,13 +104,11 @@ export function renderTxWarning(message: DisplayMessage, reportUrl: string | nul
  */
 export function renderFallbackWarning() {
   return panel([
-    heading('Transaction Review'),
+    heading('Limited Data Available'),
     divider(),
-    text('**Analysis unavailable**'),
+    text('We could not gather enough reliable information to fully assess this transaction.'),
     divider(),
-    text('CryptoGuardians could not analyze this transaction at this time. This does not indicate a problem with the transaction.'),
-    divider(),
-    text('**Proceed only if you recognize and trust this action.**'),
+    text('**Use extra caution before proceeding.**'),
     divider(),
     text('CryptoGuardians provides risk signals to help inform your decisions. You are always in control of your wallet.'),
   ]);
