@@ -88,7 +88,7 @@ function buildConfidenceExplanation(intel: IntelEnrichment): string {
  * Build the full intelligence report URL for this token.
  */
 export function buildIntelReportUrl(contractAddress: string, chain: string = 'eth'): string {
-  return `${INTEL_REPORT_BASE}/${contractAddress}?chain=${chain}`;
+  return `${INTEL_REPORT_BASE}/${chain}/${contractAddress}`;
 }
 
 /**
