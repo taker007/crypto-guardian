@@ -43,11 +43,11 @@ export function renderTxWarning(message: DisplayMessage, reportUrl: string | nul
     return panel([
       heading('Limited Data Available'),
       divider(),
-      text('We could not gather enough reliable information to fully assess this transaction.'),
+      text('Not enough information to assess this transaction.'),
       divider(),
       text('**Use extra caution before proceeding.**'),
       divider(),
-      text('CryptoGuardians provides risk signals to help inform your decisions. You are always in control of your wallet.'),
+      text('CryptoGuardians provides risk signals to help you decide. You are always in control.'),
     ]);
   }
 
@@ -94,7 +94,7 @@ export function renderTxWarning(message: DisplayMessage, reportUrl: string | nul
   }
 
   content.push(divider());
-  content.push(text('CryptoGuardians provides risk signals to help inform your decisions. You are always in control of your wallet.'));
+  content.push(text('CryptoGuardians provides risk signals to help you decide. You are always in control.'));
 
   return panel(content);
 }
@@ -106,10 +106,10 @@ export function renderFallbackWarning() {
   return panel([
     heading('Limited Data Available'),
     divider(),
-    text('We could not gather enough reliable information to fully assess this transaction.'),
+    text('Not enough information to assess this transaction.'),
     divider(),
     text('**Use extra caution before proceeding.**'),
     divider(),
-    text('CryptoGuardians provides risk signals to help inform your decisions. You are always in control of your wallet.'),
+    text('CryptoGuardians provides risk signals to help you decide. You are always in control.'),
   ]);
 }
