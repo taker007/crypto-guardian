@@ -1,18 +1,14 @@
 // =============================================================================
 // CRYPTO GUARDIANS - TRANSACTION INSIGHT DIALOG (v1.1.2)
 // =============================================================================
-// Renders transaction analysis using MetaMask Snaps JSX components.
-//
-// SNAP JSX RULES:
-// - NO React fragments (<>...</>) — not supported by Snaps runtime
-// - NO conditional JSX ({cond && <X/>}) — use array building instead
-// - Only Box, Text, Bold, Divider, Heading, Row, Link are available
-// - All children must be explicit Snap components
+// Uses ONLY Snap SDK function-based UI: panel(), heading(), text(), divider()
+// NO JSX, NO fragments, NO React-style rendering.
+// Bold via markdown (**text**), links via markdown [label](url).
 // =============================================================================
 
-import { Box, Text, Bold, Divider, Heading, Link } from '@metamask/snaps-sdk/jsx';
+import { panel, heading, text, divider } from '@metamask/snaps-sdk';
+import type { Component } from '@metamask/snaps-sdk';
 import type { CompliantMessage } from './simulationClient';
-import type { SnapComponent } from '@metamask/snaps-sdk/jsx';
 
 /**
  * Extract token identity from the details array.
@@ -36,55 +32,37 @@ function normalizeDetail(detail: string): string {
 
 /**
  * Render the transaction insight content.
- * Uses array-based construction to avoid JSX fragments.
+ * Uses array-based construction with panel() — zero JSX.
  */
 export function renderTxWarning(message: CompliantMessage, reportUrl: string | null) {
   const isLowRisk = message.severity === 'INFO' || message.severity === 'LOW';
   const tokenLine = extractTokenLine(message.details);
 
-  // Build content array — no fragments, no conditional JSX
-  const children: SnapComponent[] = [];
+  const content: Component[] = [];
 
   if (isLowRisk) {
-    children.push(<Heading>No Significant Risk Detected</Heading>);
-    children.push(<Divider />);
-    children.push(<Text>This transaction appears consistent with normal activity.</Text>);
-    children.push(<Divider />);
+    content.push(heading('No Significant Risk Detected'));
+    content.push(divider());
+    content.push(text('This transaction appears consistent with normal activity.'));
+    content.push(divider());
 
     if (tokenLine) {
-      children.push(<Text>{'\u2022'} {tokenLine}</Text>);
+      content.push(text(`• ${tokenLine}`));
     }
-    children.push(<Text>{'\u2022'} No indicators of restricted trading or hidden fees</Text>);
+    content.push(text('• No indicators of restricted trading or hidden fees'));
 
-    children.push(<Divider />);
-    children.push(<Text><Bold>Proceed if you recognize and trust this transaction.</Bold></Text>);
-
-    if (reportUrl) {
-      children.push(<Divider />);
-      children.push(
-        <Link href={reportUrl}>
-          View Full Analysis \u2192
-        </Link>,
-      );
-    }
-
-    children.push(<Divider />);
-    children.push(
-      <Text>
-        CryptoGuardians provides risk signals to help inform your decisions.
-        You are always in control of your wallet.
-      </Text>,
-    );
+    content.push(divider());
+    content.push(text('**Proceed if you recognize and trust this transaction.**'));
   } else {
     // HIGH / MEDIUM risk
-    children.push(<Heading>{message.title}</Heading>);
-    children.push(<Divider />);
-    children.push(<Text><Bold>{'\u{1F534}'} High Risk</Bold></Text>);
-    children.push(<Text>This transaction involves a token that may restrict selling or movement of funds.</Text>);
-    children.push(<Divider />);
+    content.push(heading(message.title));
+    content.push(divider());
+    content.push(text('**🔴 High Risk**'));
+    content.push(text('This transaction involves a token that may restrict selling or movement of funds.'));
+    content.push(divider());
 
     if (tokenLine) {
-      children.push(<Text>{'\u2022'} {tokenLine}</Text>);
+      content.push(text(`• ${tokenLine}`));
     }
 
     const nonTokenDetails = message.details
@@ -92,52 +70,36 @@ export function renderTxWarning(message: CompliantMessage, reportUrl: string | n
       .slice(0, 2);
 
     for (const detail of nonTokenDetails) {
-      children.push(<Text>{'\u2022'} {normalizeDetail(detail)}</Text>);
+      content.push(text(`• ${normalizeDetail(detail)}`));
     }
 
-    children.push(<Divider />);
-    children.push(<Text><Bold>{message.recommendation}</Bold></Text>);
-
-    if (reportUrl) {
-      children.push(<Divider />);
-      children.push(
-        <Link href={reportUrl}>
-          View Full Analysis \u2192
-        </Link>,
-      );
-    }
-
-    children.push(<Divider />);
-    children.push(
-      <Text>
-        CryptoGuardians provides risk signals to help inform your decisions.
-        You are always in control of your wallet.
-      </Text>,
-    );
+    content.push(divider());
+    content.push(text(`**${message.recommendation}**`));
   }
 
-  return <Box>{children}</Box>;
+  // Deep link (markdown link inside text)
+  if (reportUrl) {
+    content.push(divider());
+    content.push(text(`[View Full Analysis →](${reportUrl})`));
+  }
+
+  content.push(divider());
+  content.push(text('CryptoGuardians provides risk signals to help inform your decisions. You are always in control of your wallet.'));
+
+  return panel(content);
 }
 
 /**
  * Render the fallback when backend is unavailable.
  */
 export function renderFallbackWarning() {
-  return (
-    <Box>
-      <Heading>Transaction Review</Heading>
-      <Divider />
-      <Text><Bold>Analysis unavailable</Bold></Text>
-      <Divider />
-      <Text>
-        CryptoGuardians could not analyze this transaction at this time.
-        This does not indicate a problem with the transaction.
-      </Text>
-      <Divider />
-      <Text>
-        CryptoGuardians provides risk signals to help inform your decisions.
-        You are always in control of your wallet.
-      </Text>
-    </Box>
-  );
+  return panel([
+    heading('Transaction Review'),
+    divider(),
+    text('**Analysis unavailable**'),
+    divider(),
+    text('CryptoGuardians could not analyze this transaction at this time. This does not indicate a problem with the transaction.'),
+    divider(),
+    text('CryptoGuardians provides risk signals to help inform your decisions. You are always in control of your wallet.'),
+  ]);
 }
