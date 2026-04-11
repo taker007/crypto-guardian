@@ -59,6 +59,22 @@ export const copy = {
     // Acknowledgement body text
     acknowledgementBody1: "This token has been flagged as potentially risky. Our analysis is informational and does not guarantee outcomes.",
     acknowledgementBody2: "You are choosing to proceed with full awareness of the signals shown.",
+
+    // Blocked / paywall (scan limit reached)
+    blockedHeadline: "Scan Limit Reached",
+    blockedBody: "You have used your available free scans.",
+    blockedCtaAnonymous: "Continue with email to keep scanning.",
+    blockedCtaAuthenticated: "Upgrade for unlimited transaction protection.",
+    blockedCtaLink: "Manage your account at cryptoguardians.io",
+
+    // EOA guidance (wallet address entered instead of token contract)
+    eoaHeadline: "Not a Token Contract",
+    eoaBody: "This address appears to be a wallet, not a token contract. CryptoGuardians analyzes token contracts to detect risks before you trade.",
+    eoaGuidance1: "Use the token's contract address instead.",
+    eoaGuidance2: "Contract addresses are available on block explorers and trading platforms.",
+
+    // Conversion: subtle upgrade hint (MID/LATE only, not EARLY)
+    conversionHint: "Additional analysis available at cryptoguardians.io",
   },
 
   plain: {
@@ -98,6 +114,22 @@ export const copy = {
     // Acknowledgement body text
     acknowledgementBody1: "We spotted some warning signs with this token. This info is meant to help you decide — it can't predict what will happen.",
     acknowledgementBody2: "If you continue, you're doing so knowing what we found.",
+
+    // Blocked / paywall
+    blockedHeadline: "You've used your free scans",
+    blockedBody: "Your free scans are used up for now.",
+    blockedCtaAnonymous: "Sign up with email to keep scanning.",
+    blockedCtaAuthenticated: "Upgrade for unlimited protection.",
+    blockedCtaLink: "Manage your account at cryptoguardians.io",
+
+    // EOA guidance
+    eoaHeadline: "That's a wallet, not a token",
+    eoaBody: "It looks like this is a wallet address. We analyze token contracts to check for risks before you trade.",
+    eoaGuidance1: "Try using the token's contract address instead.",
+    eoaGuidance2: "You can find it on block explorers or trading platforms.",
+
+    // Conversion hint
+    conversionHint: "Want deeper analysis? Visit cryptoguardians.io",
   },
 };
 

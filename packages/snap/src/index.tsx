@@ -1,7 +1,7 @@
 import type { OnRpcRequestHandler, OnTransactionHandler } from '@metamask/snaps-sdk';
 import { Box, Text, Bold, Divider, Heading, Row, Link } from '@metamask/snaps-sdk/jsx';
 
-import type { RiskLevel, Tradeability, TokenAnalysis } from './types';
+import type { RiskLevel, Tradeability, TokenAnalysis, ConversionSignals } from './types';
 import { getCopy, getDynamicCopy, COPY_MODE } from './copy';
 import { fetchRiskFromCryptoIntel } from './backend';
 import type { ScanResponse } from './backend';
@@ -11,19 +11,26 @@ import type { DisplayMessage } from './simulationClient';
 import { renderTxWarning, renderFallbackWarning } from './warningDialog';
 
 // =============================================================================
-// CRYPTO GUARDIAN SNAP - UI IMPLEMENTATION
+// CRYPTO GUARDIAN SNAP v1.1.3 - UI IMPLEMENTATION
 // =============================================================================
 // This SNAP provides risk signals for Ethereum tokens AND transaction warnings.
 // It is advisory only and does NOT block transactions.
-// Ethereum Mainnet only (v1).
 //
-// TRANSACTION INSIGHTS: The onTransaction handler intercepts pending transactions,
-// sends them to the simulation backend, and displays compliant risk warnings
-// in the MetaMask confirmation screen. The user always retains full control.
-//
-// COPY MODE: Toggle between 'formal' and 'plain' in copy.ts
-// Current mode: See COPY_MODE export in copy.ts
+// v1.1.3 changes:
+// - Consumes usage + conversion signals from /api/scan
+// - Hard block (429) → dedicated blocked/paywall UI
+// - EOA (400) → dedicated guidance UI
+// - Prompt suppression — upgrade hints only when contextually appropriate
+// - Anonymous vs authenticated CTA distinction
+// - snapEligible awareness
 // =============================================================================
+
+const API_BASE = 'https://cryptoguardians.io';
+
+// ── Prompt frequency suppression ────────────────────────────────────────────
+// Track last shown conversion stage to avoid repeating same prompt.
+// This is session-scoped (resets when Snap restarts, which is fine).
+let lastShownConversionStage: string | null = null;
 
 /**
  * Get display label for risk level
@@ -119,87 +126,155 @@ function mapScanToAnalysis(scan: ScanResponse | null): TokenAnalysis {
   return base;
 }
 
-/**
- * Render the Free Tier warning screen
- * Shows: Risk level, tradeability, advisory text, upgrade prompt
- */
-function renderFreeTierWarning(analysis: TokenAnalysis) {
+// =============================================================================
+// BLOCKED STATE — shown when user has exhausted free scans
+// =============================================================================
+
+function renderBlockedState(conversion: ConversionSignals | null) {
   const c = getCopy();
+  const isAnon = conversion?.isAnonymous ?? true;
 
   return (
     <Box>
-      <Heading>{c.warningHeadline}</Heading>
+      <Heading>{c.blockedHeadline}</Heading>
       <Divider />
 
-      <Row label={c.labelRiskLevel}>
-        <Text><Bold>{getRiskLevelLabel(analysis.riskLevel)}</Bold></Text>
-      </Row>
-
-      <Row label={c.labelTradeability}>
-        <Text><Bold>{getTradeabilityLabel(analysis.tradeability)}</Bold></Text>
-      </Row>
-
-      {analysis.confidencePercent !== undefined && (
-        <Row label={c.labelConfidence}>
-          <Text><Bold>{analysis.confidencePercent}%</Bold></Text>
-        </Row>
-      )}
-
-      {analysis.sourcesUsed !== undefined && (
-        <Row label={c.labelSources}>
-          <Text><Bold>{analysis.sourcesUsed} checked</Bold></Text>
-        </Row>
-      )}
-
-      {analysis.riskSummary && (
-        <Box>
-          <Divider />
-          <Text><Bold>{c.sectionRiskSummary}</Bold></Text>
-          <Text>{analysis.riskSummary}</Text>
-        </Box>
-      )}
-
-      {analysis.confidenceExplanation && (
-        <Text>{analysis.confidenceExplanation}</Text>
-      )}
-
-      {analysis.sourceNames && analysis.sourceNames.length > 0 && (
-        <Text>{c.labelSourcesUsed}: {analysis.sourceNames.join(', ')}</Text>
-      )}
+      <Text>{c.blockedBody}</Text>
 
       <Divider />
 
-      {analysis.intelReportUrl && (
+      <Text>
+        <Bold>{isAnon ? c.blockedCtaAnonymous : c.blockedCtaAuthenticated}</Bold>
+      </Text>
+
+      {isAnon && (
         <Text>
-          <Link href={analysis.intelReportUrl}>{c.linkIntelReport}</Link>
+          <Link href={`${API_BASE}/auth/signup?source=snap`}>
+            Continue with Email
+          </Link>
         </Text>
       )}
 
-      <Text>
-        {c.disclaimerAnalysis}
-      </Text>
+      {!isAnon && (
+        <Text>
+          <Link href={`${API_BASE}/pricing?source=snap`}>
+            Upgrade to Pro
+          </Link>
+        </Text>
+      )}
 
       <Divider />
 
-      <Text>
-        {c.upgradePrompt}
-      </Text>
-
-      <Divider />
-
-      <Text>
-        {c.footer}
-      </Text>
+      <Text>{c.footer}</Text>
     </Box>
   );
 }
 
-/**
- * Render the Paid Tier analysis screen
- * Shows: All free tier info plus detailed explanations
- */
-function renderPaidTierAnalysis(analysis: TokenAnalysis) {
+// =============================================================================
+// EOA STATE — shown when address is a wallet, not a token contract
+// =============================================================================
+
+function renderEoaState() {
   const c = getCopy();
+
+  return (
+    <Box>
+      <Heading>{c.eoaHeadline}</Heading>
+      <Divider />
+
+      <Text>{c.eoaBody}</Text>
+
+      <Divider />
+
+      <Text>• {c.eoaGuidance1}</Text>
+      <Text>• {c.eoaGuidance2}</Text>
+
+      <Divider />
+
+      <Text>{c.footer}</Text>
+    </Box>
+  );
+}
+
+// =============================================================================
+// UNAVAILABLE STATE — shown when backend is unreachable or timed out
+// =============================================================================
+
+function renderUnavailableState(reason?: string) {
+  const c = getCopy();
+
+  return (
+    <Box>
+      <Heading>Analysis Unavailable</Heading>
+      <Divider />
+
+      <Text>
+        {reason === 'Analysis timed out'
+          ? 'The analysis took too long to complete. This does not indicate a problem with the token.'
+          : 'We could not complete the analysis at this time. This does not indicate a problem with the token.'}
+      </Text>
+
+      <Divider />
+
+      <Text><Bold>Proceed with caution if you choose to continue.</Bold></Text>
+
+      <Text>
+        <Link href={`${API_BASE}/intel`}>
+          Try scanning on cryptoguardians.io
+        </Link>
+      </Text>
+
+      <Divider />
+
+      <Text>{c.footer}</Text>
+    </Box>
+  );
+}
+
+// =============================================================================
+// ANALYSIS RESULT — conversion-aware rendering
+// =============================================================================
+
+/**
+ * Determine whether an upgrade/conversion hint should be shown.
+ * Rules:
+ * - EARLY stage: never show
+ * - MID/LATE: show subtle hint, but only once per stage per session
+ * - BLOCKED: handled separately (renderBlockedState)
+ * - snapEligible must be true for Snap-specific prompts
+ * - Never repeat the same stage prompt
+ */
+function shouldShowConversionHint(conversion: ConversionSignals | null): boolean {
+  if (!conversion) return false;
+  if (conversion.hardBlock) return false; // Handled by blocked state
+  if (conversion.stage === 'EARLY') return false;
+
+  // Only show if snap is eligible for prompts
+  if (conversion.channelHints?.snapEligible === false) return false;
+
+  // Suppress repeated same-stage prompts
+  if (lastShownConversionStage === conversion.stage) return false;
+
+  // MID with softPrompt, or LATE with approachingLimit
+  if (conversion.stage === 'MID' && conversion.softPrompt) {
+    lastShownConversionStage = conversion.stage;
+    return true;
+  }
+  if (conversion.stage === 'LATE' && conversion.approachingLimit) {
+    lastShownConversionStage = conversion.stage;
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Render the analysis screen with conversion awareness.
+ * Shows: Risk level, tradeability, intel, contextual upgrade hint.
+ */
+function renderAnalysis(analysis: TokenAnalysis, conversion: ConversionSignals | null) {
+  const c = getCopy();
+  const showHint = shouldShowConversionHint(conversion);
 
   return (
     <Box>
@@ -242,33 +317,9 @@ function renderPaidTierAnalysis(analysis: TokenAnalysis) {
         <Text>{c.labelSourcesUsed}: {analysis.sourceNames.join(', ')}</Text>
       )}
 
-      <Divider />
-
-      {analysis.reason && (
-        <Box>
-          <Text><Bold>{c.sectionWhyFlagged}</Bold></Text>
-          <Text>{analysis.reason}</Text>
-        </Box>
-      )}
-
-      {analysis.meaning && (
-        <Box>
-          <Text><Bold>{c.sectionWhatMeans}</Bold></Text>
-          <Text>{analysis.meaning}</Text>
-        </Box>
-      )}
-
-      {analysis.observations && analysis.observations.length > 0 && (
-        <Box>
-          <Text><Bold>{c.sectionObservations}</Bold></Text>
-          {analysis.observations.map((obs, _index) => (
-            <Text key={`obs-${obs.substring(0, 10)}`}>• {obs}</Text>
-          ))}
-        </Box>
-      )}
-
       {analysis.intelObservations && analysis.intelObservations.length > 0 && (
         <Box>
+          <Divider />
           <Text><Bold>{c.sectionIntelObservations}</Bold></Text>
           {analysis.intelObservations.map((obs, _index) => (
             <Text key={`intel-${obs.substring(0, 10)}`}>• {obs}</Text>
@@ -284,11 +335,16 @@ function renderPaidTierAnalysis(analysis: TokenAnalysis) {
         </Text>
       )}
 
-      <Text>{c.proPrompt}</Text>
-
       <Text>
         {c.disclaimerAnalysis}
       </Text>
+
+      {showHint && (
+        <Box>
+          <Divider />
+          <Text>{c.conversionHint}</Text>
+        </Box>
+      )}
 
       <Divider />
 
@@ -330,8 +386,6 @@ function renderRiskAcknowledgement() {
 
 /**
  * Get mock analysis data for UI testing
- * Uses copy system for reason/meaning/observations text
- * TODO: Replace with actual Crypto Intel backend call in future version
  */
 function getMockAnalysis(tradeability: Tradeability): TokenAnalysis {
   const dynamicCopy = getDynamicCopy();
@@ -351,12 +405,16 @@ function getMockAnalysis(tradeability: Tradeability): TokenAnalysis {
   };
 }
 
+// =============================================================================
+// RPC REQUEST HANDLER
+// =============================================================================
+
 /**
  * Handle incoming JSON-RPC requests from dApps
  *
  * Available methods:
- * - showWarning: Display free tier warning screen
- * - showAnalysis: Display paid tier analysis screen
+ * - showWarning: Display analysis screen (for testing)
+ * - showAnalysis: Display analysis screen with observations (for testing)
  * - showAcknowledgement: Display risk acknowledgement screen
  * - analyzeToken: Analyze a token via Crypto Intel backend
  * - simulateTransaction: Manually simulate a transaction and show warning dialog
@@ -368,7 +426,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 }) => {
   switch (request.method) {
 
-    // Show free tier warning screen (for testing)
+    // Show analysis screen (for testing)
     case 'showWarning': {
       const params = request.params as { tradeability?: Tradeability } | undefined;
       const tradeability = params?.tradeability || 'BLOCKED_BY_CONTRACT';
@@ -378,12 +436,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         method: 'snap_dialog',
         params: {
           type: 'confirmation',
-          content: renderFreeTierWarning(analysis),
+          content: renderAnalysis(analysis, null),
         },
       });
     }
 
-    // Show paid tier analysis screen (for testing)
+    // Show analysis screen with observations (for testing)
     case 'showAnalysis': {
       const params = request.params as { tradeability?: Tradeability } | undefined;
       const tradeability = params?.tradeability || 'BLOCKED_BY_CONTRACT';
@@ -393,7 +451,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         method: 'snap_dialog',
         params: {
           type: 'confirmation',
-          content: renderPaidTierAnalysis(analysis),
+          content: renderAnalysis(analysis, null),
         },
       });
     }
@@ -417,14 +475,36 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error('Token address is required');
       }
 
-      const scan = await fetchRiskFromCryptoIntel(params.tokenAddress);
-      const analysis = mapScanToAnalysis(scan);
+      const outcome = await fetchRiskFromCryptoIntel(
+        params.tokenAddress,
+        params.chainId || 'eth',
+      );
+
+      // Route to appropriate UI based on outcome
+      let content;
+      switch (outcome.type) {
+        case 'blocked':
+          content = renderBlockedState(outcome.conversion);
+          break;
+        case 'eoa':
+          content = renderEoaState();
+          break;
+        case 'unavailable':
+          content = renderUnavailableState(outcome.reason);
+          break;
+        case 'success':
+        default: {
+          const analysis = mapScanToAnalysis(outcome.data);
+          content = renderAnalysis(analysis, outcome.conversion);
+          break;
+        }
+      }
 
       return snap.request({
         method: 'snap_dialog',
         params: {
           type: 'confirmation',
-          content: renderFreeTierWarning(analysis),
+          content,
         },
       });
     }
