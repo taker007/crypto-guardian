@@ -1,0 +1,45 @@
+name: identity-leak-check
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  scan-commits:
+    name: Scan commit authors for banned emails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit author/committer emails
+        run: |
+          set -euo pipefail
+          BANNED='terrancejones007@gmail\.com'
+          RANGE="${{ github.event.before || 'HEAD~50' }}..HEAD"
+          echo "Scanning range: $RANGE"
+          HITS=$(git log "$RANGE" --format='%H %ae %ce' 2>/dev/null | grep -iE "$BANNED" || true)
+          if [ -n "$HITS" ]; then
+            echo "::error::Commits contain banned email:"
+            echo "$HITS"
+            exit 1
+          fi
+          echo "OK — no banned author/committer emails in range."
+
+      - name: Check diff content for banned emails
+        run: |
+          set -euo pipefail
+          BANNED='terrancejones007@gmail\.com'
+          BASE="${{ github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }}"
+          HEAD_SHA="${{ github.sha }}"
+          if ! git cat-file -e "$BASE" 2>/dev/null; then BASE="HEAD~1"; fi
+          HITS=$(git diff "$BASE" "$HEAD_SHA" -- . ':(exclude).github/workflows/identity-leak-check.yml' | grep -iE "$BANNED" || true)
+          if [ -n "$HITS" ]; then
+            echo "::error::Staged content includes banned email string:"
+            echo "$HITS" | head -20
+            exit 1
+          fi
+          echo "OK — no banned email strings in diff."
