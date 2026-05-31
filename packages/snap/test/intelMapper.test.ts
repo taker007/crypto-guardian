@@ -191,14 +191,17 @@ describe('mapIntelToObservations', () => {
 });
 
 describe('buildIntelReportUrl', () => {
+  // Web routing now uses path-based /intel/<chain>/<token> (not the old
+  // query-string ?chain= form). buildIntelReportUrl was updated to match;
+  // these assertions were updated 2026-05-31 to track current behavior.
   it('builds correct URL with default chain', () => {
     const url = buildIntelReportUrl('0xABC123');
-    expect(url).toBe('https://cryptoguardians.io/intel/0xABC123?chain=eth');
+    expect(url).toBe('https://cryptoguardians.io/intel/eth/0xABC123');
   });
 
   it('builds correct URL with specified chain', () => {
     const url = buildIntelReportUrl('0xDEF456', 'sol');
-    expect(url).toBe('https://cryptoguardians.io/intel/0xDEF456?chain=sol');
+    expect(url).toBe('https://cryptoguardians.io/intel/sol/0xDEF456');
   });
 });
 
