@@ -9,7 +9,11 @@
 // This is a standalone page that fetches from the Intel Report API.
 // =============================================================================
 
-const API_BASE = import.meta.env.VITE_API_BASE || '/api'; // Relative path in production, override via env for dev
+// This is a Gatsby project, not Vite — use Gatsby's env idiom. The previous
+// `import.meta.env.VITE_API_BASE` never resolved at runtime (Gatsby doesn't
+// populate it) so the fallback `/api` always fired; the form also broke
+// typecheck. Same fallback preserved; honors GATSBY_API_BASE for dev override.
+const API_BASE = process.env.GATSBY_API_BASE || '/api';
 
 interface IntelReport {
   contractAddress: string;
