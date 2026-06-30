@@ -4,7 +4,7 @@
 
 **Name:** Crypto Guardian
 **Type:** MetaMask SNAP
-**Version:** 1.1.1
+**Version:** 1.1.3 (npm `@taker007/crypto-guardian-snap@1.1.3`)
 **Scope:** Ethereum Mainnet only (v1)
 **Backend:** Crypto Intel at `https://cryptoguardians.io` (connected via `backend.ts`)
 
