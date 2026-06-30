@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<title>Crypto Guardian Snap — Promo 2 (Scan Result)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.tile { gap: 28px; }
+.body { display: grid; grid-template-columns: 1fr 0.9fr; gap: 44px; align-items: center; flex: 1; position: relative; z-index: 1; }
+.signals-list { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+.signal {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.signal-icon {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(96,165,250,0.10), rgba(167,139,250,0.10));
+  border: 1px solid rgba(96,165,250,0.20);
+  border-radius: 8px;
+  color: #93c5fd;
+}
+.signal-text strong { color: #f3f4f6; font-size: 13px; font-weight: 600; display: block; margin-bottom: 1px; }
+.signal-text span { color: #9ca3af; font-size: 11.5px; }
+
+.scan-card {
+  background: #111827;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+  font-size: 13px;
+}
+.scan-header { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.scan-shield { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(59,130,246,0.16), rgba(139,92,246,0.16)); border: 1px solid rgba(96,165,250,0.30); border-radius: 8px; color: #93c5fd; }
+.scan-brand { font-weight: 700; font-size: 13px; color: #f9fafb; }
+.scan-brand-sub { font-size: 10px; color: #6b7280; margin-top: 1px; }
+.scan-body { padding: 14px 0 4px; }
+.scan-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.scan-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.scan-name { font-weight: 700; color: #f3f4f6; font-size: 14px; }
+.scan-risk { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.40); padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.04em; }
+.scan-addr { font-size: 11px; color: #9ca3af; margin-bottom: 12px; }
+.scan-signals { display: flex; flex-direction: column; gap: 6px; }
+.scan-signal { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #d1d5db; }
+.scan-signal .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.scan-footer { font-size: 10px; color: #6b7280; text-align: center; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 14px; }
+</style>
+</head><body>
+<div class="tile">
+  <div class="brand-row">
+    <span class="brand-shield">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+    </span>
+    <div>
+      <div class="brand-name">Crypto Guardian</div>
+      <div class="brand-suffix">MetaMask Snap</div>
+    </div>
+    <span class="mm-pill">Multi-source intel</span>
+  </div>
+
+  <div class="body">
+    <div>
+      <h1 class="headline" style="font-size:46px">What gets <span class="accent">flagged.</span></h1>
+      <div class="signals-list">
+        <div class="signal">
+          <span class="signal-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h16l-3 8H7z"/><polyline points="8 7 12 11 16 7"/><line x1="12" y1="3" x2="12" y2="11"/></svg></span>
+          <div class="signal-text"><strong>Honeypots & sell restrictions</strong><span>Tokens that block selling or trap funds</span></div>
+        </div>
+        <div class="signal">
+          <span class="signal-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 8l4 1 4-3 3 11 2-2"/><path d="M19 21l-2-3 3-1" stroke-linejoin="miter"/></svg></span>
+          <div class="signal-text"><strong>Liquidity & rug patterns</strong><span>Unlocked liquidity, owner mint, withdrawal flags</span></div>
+        </div>
+        <div class="signal">
+          <span class="signal-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><path d="M2 13c0-2.2 1.8-4 4-4s4 1.8 4 4"/><circle cx="17" cy="6" r="1.8"/><circle cx="19" cy="14" r="1.8"/><circle cx="15" cy="19" r="1.8"/><line x1="8" y1="6" x2="15" y2="6"/><line x1="8" y1="9" x2="17" y2="13"/><line x1="8" y1="12" x2="14" y2="18"/></svg></span>
+          <div class="signal-text"><strong>Suspicious creator patterns</strong><span>Deployer history across previous tokens</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scan-card">
+      <div class="scan-header">
+        <span class="scan-shield">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </span>
+        <div><div class="scan-brand">Crypto Guardian</div><div class="scan-brand-sub">Token Risk Insights</div></div>
+      </div>
+      <div class="scan-body">
+        <div class="scan-label">Scan Result</div>
+        <div class="scan-row"><span class="scan-name">PEPE-CLONE-V2</span><span class="scan-risk">HIGH RISK</span></div>
+        <div class="scan-addr">0xb33f…c742 · Ethereum</div>
+        <div class="scan-signals">
+          <div class="scan-signal"><span class="dot" style="background:#ef4444"></span>Sell restrictions detected</div>
+          <div class="scan-signal"><span class="dot" style="background:#ef4444"></span>Owner can modify balances</div>
+          <div class="scan-signal"><span class="dot" style="background:#eab308"></span>Liquidity unlocked</div>
+          <div class="scan-signal"><span class="dot" style="background:#eab308"></span>Top 3 holders control 78%</div>
+        </div>
+      </div>
+      <div class="scan-footer">Informational only · Not financial advice</div>
+    </div>
+  </div>
+</div>
+</body></html>

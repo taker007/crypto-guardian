@@ -1,0 +1,83 @@
+/* Shared styles for Snap promo tiles — 960×540 canvas */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: #000; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+}
+.tile {
+  width: 960px;
+  height: 540px;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(59,130,246,0.22) 0%, transparent 42%),
+    radial-gradient(circle at 14% 88%, rgba(139,92,246,0.18) 0%, transparent 38%),
+    linear-gradient(135deg, #060912 0%, #0e1320 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+  overflow: hidden;
+  padding: 52px 60px;
+  color: #f9fafb;
+  display: flex; flex-direction: column;
+}
+.tile::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* Brand strip */
+.brand-row { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+.brand-shield {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(59,130,246,0.20), rgba(139,92,246,0.20));
+  border: 1px solid rgba(96,165,250,0.40);
+  border-radius: 11px;
+  color: #93c5fd;
+}
+.brand-name { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.brand-suffix {
+  font-size: 11px; font-weight: 600; color: #6b7280;
+  display: block; margin-top: 1px; letter-spacing: 0.10em; text-transform: uppercase;
+}
+.mm-pill {
+  font-size: 10px; font-weight: 700;
+  background: rgba(247,143,30,0.10);
+  color: #f78f1e;
+  border: 1px solid rgba(247,143,30,0.30);
+  padding: 4px 9px; border-radius: 4px;
+  margin-left: auto;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* Typography */
+.headline {
+  font-size: 52px; font-weight: 800;
+  line-height: 1.05; letter-spacing: -0.025em;
+}
+.accent {
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.subtitle {
+  font-size: 17px; color: #9ca3af; font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Chips */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; position: relative; z-index: 1; }
+.chip {
+  font-size: 11px; font-weight: 600;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #9ca3af;
+  padding: 6px 11px; border-radius: 5px; letter-spacing: 0.02em;
+  display: inline-flex; align-items: center; gap: 5px;
+}
